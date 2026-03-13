@@ -86,3 +86,6 @@
 #define RunOutTime 15000
 #define RefuelWait 5000
 #define CAR_AMOUNT 700 //Change to Your Vehicle Amount
+
+// Funcs:
+forward Float:GetDistanceBetweenPlayers(p1,p2);
