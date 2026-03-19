@@ -171,6 +171,7 @@ enum hNews
 enum pInfo
 {
 	pKey[128],
+	pName[24],
 	pLevel,
 	pAdmin,
 	pDonateRank,
@@ -179,6 +180,7 @@ enum pInfo
 	pReg,
 	pSex,
 	pAge,
+	pContinent,
 	pOrigin,
 	pCK,
 	pMuted,
@@ -261,6 +263,8 @@ enum pInfo
 	pFuel,
 	pMarried,
 	pMarriedTo[128],
+	pDialog,
+	bool:pToggle
 };
 
 enum hInfo

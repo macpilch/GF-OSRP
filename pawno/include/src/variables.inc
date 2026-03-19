@@ -7,11 +7,24 @@
 	Desc: All server vars, including arrays.
 */
 
-new gString[256];
+new MySQL:mySQLHandle;
+
+new queryStr[1024];
+new mainStr[512];
+
+new oocName[MAX_PLAYERS][24];
+new escapedName[MAX_PLAYERS][24];
+
+new playerPass[MAX_PLAYERS][65];
+new playerSalt[MAX_PLAYERS][17];
+new accountID[MAX_PLAYERS];
+
+new bool:loadedIntro[MAX_PLAYERS];
+
 new gTeam[MAX_PLAYERS];
 new Security = 0;
 new CreatedCars[100];
-new CreatedCar = 0;
+stock CreatedCar = 0;
 new Tax = 0;
 new TaxValue = 0;
 new Jackpot = 0;
@@ -29,7 +42,7 @@ new KartingRound = 0;
 new FirstKartWinner = 999;
 new SecondKartWinner = 999;
 new ThirdKartWinner = 999;
-new InRing = 0;
+stock InRing = 0;
 new RoundStarted = 0;
 new BoxDelay = 0;
 new Boxer1 = 255;
@@ -39,17 +52,17 @@ new PlayerBoxing[MAX_PLAYERS];
 new hitfound = 0;
 new hitid = 999;
 new Medics = 0;
-new MedicCall = 999;
+stock MedicCall = 999;
 new MedicCallTime[MAX_PLAYERS];
 new Mechanics = 0;
-new MechanicCall = 999;
+stock MechanicCall = 999;
 new MechanicCallTime[MAX_PLAYERS];
 new TaxiDrivers = 0;
-new TaxiCall = 999;
+stock TaxiCall = 999;
 new TaxiCallTime[MAX_PLAYERS];
 new TaxiAccepted[MAX_PLAYERS];
 new BusDrivers = 0;
-new BusCall = 999;
+stock BusCall = 999;
 new BusCallTime[MAX_PLAYERS];
 new BusAccepted[MAX_PLAYERS];
 new TransportDuty[MAX_PLAYERS];
@@ -176,7 +189,7 @@ new gGas[MAX_PLAYERS];
 new gSpeedo[MAX_PLAYERS];
 new gSpentCash[MAX_PLAYERS];
 new FirstSpawn[MAX_PLAYERS];
-new SwitchKey[MAX_PLAYERS];
+stock SwitchKey[MAX_PLAYERS];
 new Fixr[MAX_PLAYERS];
 new Locator[MAX_PLAYERS];
 new Mobile[MAX_PLAYERS];
@@ -186,11 +199,11 @@ new gPlayerAccount[MAX_PLAYERS];
 new gPlayerMission[MAX_PLAYERS];
 new gLastDriver[302];
 new gCarLock[265];
-new MissionPlayable = 0;
-new noooc = 0;
-new adds = 1;
-new addtimer = 60000;
-new Float:rx, Float:ry, Float:rz;
+stock MissionPlayable = 0;
+stock noooc = 0;
+stock adds = 1;
+stock addtimer = 60000;
+stock Float:rx, Float:ry, Float:rz;
 new carselect[15];
 new objstore[128];
 new cbjstore[128];
@@ -229,13 +242,13 @@ new idletime = 600000; //10 mins
 new civnokill = 0;
 new suecost = 2000;
 new cchargetime = 60;
-new txtcost = 25;
+stock txtcost = 25;
 new pickups;
 new CIV[] = {7,19,20,23,73,101,122};
-new STD1[] = {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3};
-new STD2[] = {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3};
-new STD3[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3};
-new STD4[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 3};
+stock STD1[] = {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3};
+stock STD2[] = {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3};
+stock STD3[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3};
+stock STD4[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 3};
 new SELLCAR1[] = { 1000, 1124, 1245, 1349, 1475, 1574, 1636, 1762, 1895, 1946, 2000 };
 new SELLCAR2[] = { 2099, 2135, 2255, 2378, 2457, 2563, 2614, 2721, 2878, 2988, 3000 };
 new SELLCAR3[] = { 3058, 3175, 3212, 3377, 3454, 3555, 3678, 3751, 3865, 3964, 4000 };
@@ -243,7 +256,7 @@ new SELLCAR4[] = { 4077, 4123, 4275, 4378, 4422, 4565, 4613, 4752, 4897, 4911, 5
 new Float:ChangePos[MAX_PLAYERS][3];
 new ChangePos2[MAX_PLAYERS][2];
 new Float:PlayerPos[MAX_PLAYERS][6];
-new Float:TeleportDest[MAX_PLAYERS][3];
+stock Float:TeleportDest[MAX_PLAYERS][3];
 new Float:TelePos[MAX_PLAYERS][6];
 new Gas[CAR_AMOUNT];
 new Refueling[MAX_PLAYERS];
@@ -253,7 +266,7 @@ new SpeedMode = 1;
 new UpdateSeconds = 1;
 
 new Music[MAX_PLAYERS];
-new Songs[7][1] = {
+stock Songs[7][1] = {
 {1187},
 {1185},
 {1183},
@@ -263,8 +276,8 @@ new Songs[7][1] = {
 {1062}
 };
 
-new FishNamesNumber = 22;
-new FishNames[22][20] = {
+stock FishNamesNumber = 22;
+stock FishNames[22][20] = {
 {"Jacket"},
 {"Amberjack"},
 {"Grouper"},
@@ -303,7 +316,7 @@ new Float:gRandomPlayerSpawns[1][3] = {
 {2223.8,-1147.1,1025.7} // sp1
 };
 
-new Float:gInviteSpawns[10][4] = {
+stock Float:gInviteSpawns[10][4] = {
 {-1976.5912,166.1818,36.9623,272.6393},
 {-1975.8610,162.1945,36.9623,272.0126},
 {-1975.7461,157.5404,36.9623,276.1093},
@@ -336,7 +349,7 @@ new Float:gMedPlayerSpawns[2][3] = {
 new Titel[pBoxingStats];
 new CKInfo[10][cCKInfo];
 new PaperInfo[10][pPaperInfo];
-new Paper[MAX_PLAYERS][pPaper];
+stock Paper[MAX_PLAYERS][pPaper];
 new FamilyInfo[10][fInfo];
 new TurfInfo[6][zInfo];
 new Turfs[6];
@@ -353,7 +366,6 @@ new PlayerHaul[100][pHaul];
 new PlayerCrime[MAX_PLAYERS][pCrime];
 new MissionInfo[mInfo];
 new PlayMission[kInfo];
-new IRCInfo[10][iInfo];
 
 new RandCars[20][1] = {
 {496},{542},{507},{585},
@@ -367,7 +379,7 @@ new RandLCars[1][1] = {
 {431}// coach
 };
 
-new GunPrice[30][1] = {
+stock GunPrice[30][1] = {
 {500}, //parachute
 {400}, //golfclub
 {300}, //nightstick
@@ -709,3 +721,6 @@ new CarSpawns[182][eCars] = {
 	{550,1695.1428,-1519.2667,13.1671,0.7121},
 	{551,1694.7080,-1501.7454,13.1675,357.8150}
     };
+
+new Text:SplashScreen;
+new Text:Intro[4];

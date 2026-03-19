@@ -9,21 +9,28 @@
 
 #include <a_samp>
 #include <Pawn.CMD>
+#include <streamer>
 #include <sscanf2>
+#include <foreach>
+#include <mysql>
 
 #include "src/defines"
-#include "src/dialogs"
 #include "src/enums"
 #include "src/variables"
+#include "src/textdraws"
 #include "src/callbacks"
-#include "src/commands/player"
+#include "src/dialogs"
 #include "src/funcs"
 
 main() {
+	new callSecs = gettime();
+
 	printf(" ");
 	printf(" ");
 	printf(" The Godfather: LS/SF");
 	printf("_____________________");
 	printf(" By: Fear & parts of Astro & steeZ & MisterMagik");
 	printf(" ");
+
+	printf("[MAIN] main (%0.1d sec)", gettime() - callSecs);
 }
