@@ -7,6 +7,34 @@
 	Desc: Player commands.
 */
 
+CMD:stats(playerid, params[]) {
+	if(!gPlayerLogged[playerid]) {
+		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jesteś zalogowany.");
+	}
+
+	ShowStats(playerid,playerid);
+	return 1;
+}
+
+CMD:b(playerid, params[]) {
+	if(!gPlayerLogged[playerid]) {
+		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jesteś zalogowany.");
+	}
+
+	new result[64];
+
+	if(sscanf(params, "s[64]", result)) {
+		return SendClientMessage(playerid, COLOR_GRAD2, "Wpisz: /b [czat ooc]");
+	}
+
+	mainStr[0] = EOS;
+	format(mainStr, sizeof(mainStr), "%s pisze OOC: (( %s ))", PlayerInfo[playerid][pName], result);
+	ProxDetector(20.0, playerid, mainStr,COLOR_FADE1,COLOR_FADE2,COLOR_FADE3,COLOR_FADE4,COLOR_FADE5);
+	printf("%s", mainStr);
+	return 1;
+}
+
+/*
 CMD:pay(playerid, params[]) {
 	new giveplayerid, moneys;
 
@@ -87,15 +115,6 @@ CMD:charity(playerid, params[]) {
 	PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
 	SendClientMessage(playerid, COLOR_GRAD1, gString);
 	PayLog(gString);
-	return 1;
-}
-
-CMD:stats(playerid, params[]) {
-	if(!gPlayerLogged[playerid]) {
-		return SendClientMessage(playerid, COLOR_GRAD1, "   Nie jesteś zalogowany !");
-	}
-
-	ShowStats(playerid,playerid);
 	return 1;
 }
 
@@ -949,23 +968,6 @@ CMD:local(playerid, params[]) {
 }
 
 alias:local("l", "say")
-
-CMD:b(playerid, params[]) {
-	if(!gPlayerLogged[playerid]) {
-		return SendClientMessage(playerid, COLOR_GREY, "   You havent logged in yet !");
-	}
-
-	new result[64];
-
-	if(sscanf(params, "s[64]", result)) {
-		return SendClientMessage(playerid, COLOR_GRAD2, "Uzycie: /b [local ooc chat]");
-	}
-
-	format(gString, sizeof(gString), "%s Says: (( %s ))", PlayerInfo[playerid][pName], result);
-	ProxDetector(20.0, playerid, gString,COLOR_FADE1,COLOR_FADE2,COLOR_FADE3,COLOR_FADE4,COLOR_FADE5);
-	printf("%s", gString);
-	return 1;
-}
 
 CMD:close(playerid, params[]) {
 	if(!gPlayerLogged[playerid]) {
@@ -4477,6 +4479,7 @@ CMD:setint(playerid, params[]) {
 
 CMD:skydive(playerid, params[]) {
 	if(PlayerInfo[playerid][pAdmin] >= 2) {
+		new Float:rx, Float:ry, Float:rz;
 		GetPlayerPos(playerid, rx, ry, rz);
 		GivePlayerWeapon(playerid, 46, 0);
 		SetPlayerPos(playerid,rx, ry, rz+1500);
@@ -13235,3 +13238,4 @@ CMD:contract(playerid, params[]) {
 	}
 	return 1;
 }
+*/

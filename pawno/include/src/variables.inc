@@ -12,11 +12,13 @@ new MySQL:mySQLHandle;
 new queryStr[2048];
 new mainStr[512];
 
-new oocName[MAX_PLAYERS][24];
+new accName[MAX_PLAYERS][24];
 new escapedName[MAX_PLAYERS][24];
 
-new playerPass[MAX_PLAYERS][65];
-new playerSalt[MAX_PLAYERS][17];
+new accPassword[MAX_PLAYERS][65];
+new accSalt[MAX_PLAYERS][17];
+new bool:accAntiCrash[MAX_PLAYERS];
+new bool:accLastCrash[MAX_PLAYERS];
 
 new bool:loadedIntro[MAX_PLAYERS];
 new bool:createdChar[MAX_PLAYERS];
@@ -199,7 +201,6 @@ stock MissionPlayable = 0;
 stock noooc = 0;
 stock adds = 1;
 stock addtimer = 60000;
-stock Float:rx, Float:ry, Float:rz;
 new carselect[15];
 new objstore[128];
 new cbjstore[128];
@@ -218,22 +219,8 @@ new callcost = 10; //20 seconds
 new realchat = 1;
 new timeshift = -1;
 new shifthour;
-new othtimer;
-new synctimer;
-new newmistimer;
-new unjailtimer;
-new turftimer;
-new pickuptimer;
-new spectatetimer;
-new idletimer;
-new productiontimer;
-new accountstimer;
-new checkgastimer;
-new stoppedvehtimer;
-new cartimer;
 new intrate = 1;
 new levelexp = 4;
-new idletime = 600000; //10 mins
 new civnokill = 0;
 new suecost = 2000;
 new cchargetime = 60;

@@ -172,6 +172,7 @@ enum pInfo
 {
 	pAID,
 	pName[24],
+	pDate[32],
 	pLevel,
 	pAdmin,
 	pDonateRank,

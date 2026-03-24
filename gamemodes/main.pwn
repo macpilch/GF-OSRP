@@ -13,14 +13,17 @@
 #include <sscanf2>
 #include <foreach>
 #include <mysql>
+#include <YSI\y_timers>
 
-#include "src/defines"
-#include "src/enums"
-#include "src/variables"
-#include "src/textdraws"
-#include "src/callbacks"
-#include "src/dialogs"
-#include "src/funcs"
+#include "src\defines"
+#include "src\enums"
+#include "src\variables"
+#include "src\textdraws"
+#include "src\callbacks"
+#include "src\dialogs"
+#include "src\commands\player"
+#include "src\funcs"
+#include "src\timers"
 
 main() {
 	new callSecs = gettime();
