@@ -207,8 +207,6 @@ Operators:
 	-
 -*----------------------------------------------------------------------------*/
 
-#define NO_PERSONAL_OBJECTS
-
 #if !defined OBJECT_BOUNDS_MINX
 	#if defined OBJECT_BOUNDS
 		#define OBJECT_BOUNDS_MINX (-OBJECT_BOUNDS)
@@ -245,7 +243,7 @@ Operators:
 #define OBJECT_BOUNDS_Y_SIZE (OBJECT_BOUNDS_MAXY - OBJECT_BOUNDS_MINY)
 
 #if !defined MAX_DYN_OBJECTS
-	#define MAX_DYN_OBJECTS (5000)
+	#define MAX_DYN_OBJECTS (10000)
 #endif
 
 #define AVERAGE_OBJECTS_PER_SECTOR (500)
@@ -322,7 +320,7 @@ Operators:
 	#if defined OBJECT_VIEW_DISTANCE
 		#define DEFAULT_OBJECT_VIEW (OBJECT_VIEW_DISTANCE)
 	#else
-		#define DEFAULT_OBJECT_VIEW (275)
+		#define DEFAULT_OBJECT_VIEW (200)
 	#endif
 #endif
 
@@ -347,7 +345,7 @@ Operators:
 #define SECTOR_CHECK_TIME (1000)
 #define SECTOR_CHECK_FREQUENCY ceildiv(SECTOR_CHECK_TIME, (1000 / OBJECT_LOOP_GRANULARITY))
 
-#define MAY_OBJECTS (240)
+#define MAY_OBJECTS (150)
 
 #if !defined OBJECT_WORLDS
 	#define OBJECT_WORLDS MAX_WORLDS
@@ -1216,8 +1214,10 @@ Notes:
 
 static stock Object_AddToUpdate(objectid)
 {
+	printf("updates");
 	if (YSI_g_sObjects[objectid][E_OBJECT_UPDATES] == NO_OBJECT)
 	{
+		printf("added");
 		YSI_g_sObjects[objectid][E_OBJECT_UPDATES] = YSI_g_sSomethingMoved;
 		YSI_g_sSomethingMoved = objectid;
 	}
@@ -3278,25 +3278,20 @@ public Object_Loop()
 		for (i = objStart; i != -1; i = sObjList[i][E_OBJECT_ITTER_NEXT])
 		{
 			new
-				objSet = sObjList[i][E_OBJECT_ITTER_OBJ],
-				e_OBJ_FLAG:flag = YSI_g_sObjects[objSet][E_OBJECT_MODEL];
+				objSet = sObjList[i][E_OBJECT_ITTER_OBJ];
 			if (Bit_Get(objects, objSet))
 			{
 				new
-					obj = CreatePlayerObject(playerid, flag & e_OBJ_FLAG_MODEL, sObjList[i][E_OBJECT_ITTER_X], sObjList[i][E_OBJECT_ITTER_Y], sObjList[i][E_OBJECT_ITTER_Z], YSI_g_sObjects[objSet][E_OBJECT_RX], YSI_g_sObjects[objSet][E_OBJECT_RY], YSI_g_sObjects[objSet][E_OBJECT_RZ]);
+					obj = CreatePlayerObject(playerid, YSI_g_sObjects[objSet][E_OBJECT_MODEL] & e_OBJ_FLAG_MODEL, sObjList[i][E_OBJECT_ITTER_X], sObjList[i][E_OBJECT_ITTER_Y], sObjList[i][E_OBJECT_ITTER_Z], YSI_g_sObjects[objSet][E_OBJECT_RX], YSI_g_sObjects[objSet][E_OBJECT_RY], YSI_g_sObjects[objSet][E_OBJECT_RZ]);
 				if (obj != 0xFF)
 				{
 					YSI_g_sPlayerObjects[playerid][obj - 1] = objSet;
 					Bit_Set(objects, objSet, 0, OBJECT_BITS);
 					#if !defined NO_OBJECTS_MOVE
-						if  (flag & e_OBJ_FLAG_MOVED)
+						if  (YSI_g_sObjects[objSet][E_OBJECT_MODEL] & e_OBJ_FLAG_MOVED)
 						{
 							MovePlayerObject(playerid, obj, YSI_g_sObjects[objSet][E_OBJECT_MX], YSI_g_sObjects[objSet][E_OBJECT_MY], YSI_g_sObjects[objSet][E_OBJECT_MZ], YSI_g_sObjects[objSet][E_OBJECT_MS]);
-							YSI_g_sPlayerObjects[playerid][obj - 1] |= _:(flag & e_OBJ_FLAG_MOVED);
-						}
-						if  (flag & e_OBJ_FLAG_ATTACHED)
-						{
-							AttachPlayerObjectToPlayer(playerid, obj, Object_GetAttach(objSet), YSI_g_sObjects[objSet][E_OBJECT_X], YSI_g_sObjects[objSet][E_OBJECT_Y], YSI_g_sObjects[objSet][E_OBJECT_Z], YSI_g_sObjects[objSet][E_OBJECT_RX], YSI_g_sObjects[objSet][E_OBJECT_RY], YSI_g_sObjects[objSet][E_OBJECT_RZ]);
+							YSI_g_sPlayerObjects[playerid][obj - 1] |= _:(YSI_g_sObjects[objSet][E_OBJECT_MODEL] & e_OBJ_FLAG_MOVED);
 						}
 					#endif
 				}
@@ -3338,7 +3333,6 @@ Notes:
 
 static Object_ParseSet(playerid, objSet, Float:x, Float:y, Float:z, world, objList[][E_OBJECT_ITTER], &objStart, &objEnd, &objCount, bool:dynam)
 {
-	#pragma unused playerid
 	if (objSet == NO_OBJECT) return;
 	new
 		#if !defined NO_OBJECTS_MOVE && defined NO_OBJECT_ATTACH
@@ -3871,8 +3865,6 @@ Notes:
 	DBGP2("Object_OnPlayerEnterArea() start");
 	#if defined _YSI_SETUP_MASTER
 		setproperty(0, "YSIReq", 0);
-	#else
-		#pragma unused playerid
 	#endif
 	#if defined NO_OBJECTS_MOVE
 		return 0;

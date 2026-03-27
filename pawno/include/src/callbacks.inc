@@ -39,6 +39,7 @@ sampCallback OnGameModeInit() {
 	LoadTurfs();
 	LoadPapers();*/
 	TextDrawsInit();
+	InitVehicleData();
 
 	News[hTaken1] = 0; News[hTaken2] = 0; News[hTaken3] = 0; News[hTaken4] = 0; News[hTaken5] = 0;
 	format(string, sizeof(string), "Nothing");
@@ -88,12 +89,6 @@ sampCallback OnGameModeInit() {
 		AddPlayerClass(Peds[i][0],1958.3783,1343.1572,1100.3746,269.1425,-1,-1,-1,-1,-1,-1);
 	}
 
-	// Car Spawns
-	for(new h = 0; h < sizeof(HouseInfo); h++)
-	{
-		AddStaticVehicleEx(HouseInfo[h][hVec], HouseCarSpawns[h][0], HouseCarSpawns[h][1], HouseCarSpawns[h][2], HouseCarSpawns[h][3], HouseInfo[h][hVcol1], HouseInfo[h][hVcol2], 60000);
-		gCarLock[h+1] = 1;
-	}//34
 	for(new h = 0; h < sizeof(HouseInfo); h++)
 	{
 		if(HouseInfo[h][hOwned] == 0)
@@ -183,26 +178,13 @@ sampCallback OnGameModeInit() {
 		new tmphour;
 		new tmpminute;
 		new tmpsecond;
+
 		gettime(tmphour, tmpminute, tmpsecond);
+
 		FixHour(tmphour);
-		tmphour = shifthour;
+		tmphour = shifthour + 1;
+
 		SetWorldTime(tmphour);
-	}
-
-	SyncUp();
-	SetPlayerUnjail();
-	OtherTimer();
-	CarCheck();
-	CustomPickups();
-	Spectator();
-	IdleKick();
-	Production();
-	SaveAccounts();
-	CheckGas();
-    StoppedVehicle();
-
-	for(new i = 0; i < 165; i++) {
-		AddCar(i);
 	}
 
 	CarInit();
@@ -254,9 +236,20 @@ sampCallback OnPlayerConnect(playerid) {
 	format(queryStr, sizeof(queryStr), "*** %s (id: %d) do³¹czy³ do serwera.", accName[playerid], playerid);
 	ABroadCast(COLOR_GREY, mainStr, 1);
 
+	VehicleStats[playerid] = TextDrawCreate(618.447998, 323.166717, "_");
+	TextDrawLetterSize(VehicleStats[playerid], 0.298667, 1.588333);
+	TextDrawAlignment(VehicleStats[playerid], 3);
+	TextDrawColor(VehicleStats[playerid], -1);
+	TextDrawSetShadow(VehicleStats[playerid], 0);
+	TextDrawSetOutline(VehicleStats[playerid], 1);
+	TextDrawBackgroundColor(VehicleStats[playerid], 255);
+	TextDrawFont(VehicleStats[playerid], 2);
+	TextDrawSetProportional(VehicleStats[playerid], 1);
+
 	gActivePlayers[playerid]++;
 	numplayers++;
 	loadedIntro[playerid] = false;
+	createdChar[playerid] = false;
 	SelectChar[playerid] = 0; HidePM[playerid] = 0; PhoneOnline[playerid] = 0;
 	SelectCharID[playerid] = 0; SelectCharPlace[playerid] = 0; ChosenSkin[playerid] = 0;
 	GettingJob[playerid] = 0; GuardOffer[playerid] = 999; GuardPrice[playerid] = 0;
@@ -398,6 +391,7 @@ sampCallback OnPlayerConnect(playerid) {
 sampCallback OnPlayerDisconnect(playerid, reason) {
 	gActivePlayers[playerid]--;
 	numplayers--;
+
 	PlayerInfo[playerid][pAdjustable] = 1;
 	SavePlayerData(playerid);
 
@@ -644,6 +638,7 @@ sampCallback OnPlayerSpawn(playerid)
 	SetPlayerWeapons(playerid);
 	SetPlayerSpawn(playerid);
 	SetPlayerToTeamColor(playerid);
+	PlayerFixRadio(playerid);
 	for(new i = 0; i < sizeof(Turfs); i++)
 	{
 	    GangZoneShowForPlayer(playerid, i, TurfInfo[i][zColor]);
@@ -987,10 +982,18 @@ sampCallback OnPlayerDeath(playerid, killerid, reason)
 	return 1;
 }
 
-sampCallback OnVehicleSpawn(vehicleid)
-{
+sampCallback OnVehicleSpawn(vehicleid) {
 	return 1;
 }
+
+/*sampCallback OnVehicleStreamIn(vehicleid, forplayerid) {
+	SetVehicleNumberPlate(vehicleid, VehicleInfo[vehicleid][vPlate]);
+	SetVehicleToRespawn(vehicleid);
+
+	SetVehicleHealth(vehicleid, VehicleInfo[vehicleid][vEngineHp]);
+	SetVehicleParamsForPlayer(vehicleid, forplayerid, 0, VehicleInfo[vehicleid][vLock]);
+	return 1;
+}*/
 
 sampCallback OnVehicleDeath(vehicleid, killerid)
 {
@@ -2315,7 +2318,8 @@ sampCallback OnPlayerExitedMenu(playerid)
 sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 {
 	new string[256];
-	if(newstate == PLAYER_STATE_ONFOOT)
+
+	if(newstate == PLAYER_STATE_ONFOOT && oldstate == PLAYER_STATE_DRIVER)
 	{
 	    if(PlayerKarting[playerid] > 0 && PlayerInKart[playerid] > 0)
 		{
@@ -2355,9 +2359,16 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 				TransportDriver[playerid] = 999;
 			}
 		}
+
+		if(gLastCar[playerid] != INVALID_VEHICLE_ID) {
+			TextDrawHideForPlayer(playerid, VehicleStats[playerid]);
+			SaveVehicleData(gLastCar[playerid], VEHICLE_SAVE_SPAWN);
+		}
+
 		TelePos[playerid][0] = 0.0;
 		TelePos[playerid][1] = 0.0;
 	}
+
 	if(newstate == PLAYER_STATE_PASSENGER) // TAXI & BUSSES
 	{
 	    new name[MAX_PLAYER_NAME];
@@ -2403,6 +2414,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 	        }
 	    }
 	}
+
 	if(newstate == PLAYER_STATE_WASTED)
 	{
 		if(WantedLevel[playerid] >= 1)
@@ -2437,13 +2449,16 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 			}
 		}
 	}
-	if(newstate == PLAYER_STATE_DRIVER) //buggy dont finnish
+
+	if(newstate == PLAYER_STATE_DRIVER && oldstate == PLAYER_STATE_ONFOOT) //buggy dont finnish
 	{// 38 / 49 / 56 = SS
 		new newcar = GetPlayerVehicleID(playerid);
 		new oldcar = gLastCar[playerid];
 		new housecar = PlayerInfo[playerid][pPhousekey]+1;
+
 		TelePos[playerid][0] = 0.0;
 		TelePos[playerid][1] = 0.0;
+
 		if(IsABoat(newcar))
 		{
 		    if(PlayerInfo[playerid][pBoatLic] < 1)
@@ -2482,6 +2497,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 				SetPlayerCriminal(playerid,255, "Drunk Driving");
 			}
 		}//Done with car check
+
 		if(IsACopCar(newcar))
 		{
 		    if(IsACop(playerid)) { }
@@ -2492,6 +2508,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		    if(PlayerInfo[playerid][pMember] == 4||PlayerInfo[playerid][pLeader] == 4) { }
 		    else { RemovePlayerFromVehicle(playerid); }
 		}
+
 		if(IsATruck(newcar))
 		{
 			format(string, sizeof(string), "Produkty: %d/%d", PlayerHaul[newcar][pLoad],PlayerHaul[newcar][pCapasity]);
@@ -2499,6 +2516,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 			SendClientMessage(playerid, COLOR_WHITE, "Informacja: Mo¿esz dowoziæ produkty do biznesów. Obecna cena za 1 produkt: $23.");
 			SendClientMessage(playerid, COLOR_WHITE, "Komendy: /dostawy /load /buyprods /sellprods");
 		}
+
 		if(PlayerKarting[playerid] != 0)
 		{
 		    new kart = GetPlayerVehicleID(playerid);
@@ -2508,6 +2526,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		    	KartingPlayers ++;
 			}
 		}
+
 		if(newcar == 39 || newcar == 40)
 		{
 		    if(PlayerInfo[playerid][pMember] == 3 || PlayerInfo[playerid][pLeader] == 3)//national guard
@@ -2523,6 +2542,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		        RemovePlayerFromVehicle(playerid);
 		    }
 		}
+
 		if(newcar == 55 || newcar == 59)
 		{
 		    if(PlayerInfo[playerid][pMember] != 4)
@@ -2531,6 +2551,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		        RemovePlayerFromVehicle(playerid);
 		    }
 		}
+
 		if(newcar == 64 || newcar == 65)
 		{
 		    if(PlayerInfo[playerid][pJob] != 14)
@@ -2539,6 +2560,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		        RemovePlayerFromVehicle(playerid);
 		    }
 		}
+
 		if(newcar == 69 || newcar == 70 || newcar == 71 || newcar == 99 || newcar == 100 || newcar == 101)
 		{
 		    if(TakingLesson[playerid] == 1) { }
@@ -2548,6 +2570,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		        RemovePlayerFromVehicle(playerid);
 		    }
 		}
+
 		if(newcar == 82 || newcar == 84 || newcar == 85 || newcar == 94)
 		{
 		    if(PlayerInfo[playerid][pMember] == 10||PlayerInfo[playerid][pLeader] == 10) { }
@@ -2557,6 +2580,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		        RemovePlayerFromVehicle(playerid);
 		    }
 		}
+
 		if(newcar == 95)
 		{
 		    if(PlayerInfo[playerid][pMember] == 8 || PlayerInfo[playerid][pLeader] == 8)
@@ -2573,6 +2597,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 			    RemovePlayerFromVehicle(playerid);
 		    }
 		}
+
 		if(newcar == 96 || newcar == 97 || newcar == 98)
 		{
 			if(PlayerInfo[playerid][pMember] == 9 || PlayerInfo[playerid][pLeader] == 9){ }
@@ -2587,6 +2612,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 			    RemovePlayerFromVehicle(playerid);
 			}
 		}
+
 		if(newcar==110||newcar==111||newcar==112||newcar==113||newcar==114||newcar==115)
 		{
 		    if(PlayerKarting[playerid] != 1)
@@ -2594,6 +2620,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		        RemovePlayerFromVehicle(playerid);
 		    }
 		}
+
 		if(newcar >= 72 && newcar <= 74)
 		{
 			if (HireCar[playerid] != newcar)
@@ -2603,6 +2630,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 				GameTextForPlayer(playerid, string, 5000, 3);
 			}
 		}
+
 		if(newcar >= 75 && newcar <= 77)
 		{
 			if (HireCar[playerid] != newcar)
@@ -2612,6 +2640,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 				GameTextForPlayer(playerid, string, 5000, 3);
 			}
 		}
+
 		if(oldcar != 301)
 		{
 			if((housecar != oldcar && oldcar != 0) && (HireCar[playerid] != oldcar && newcar != housecar))
@@ -2624,9 +2653,19 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 				}
 			}
 		}
+
+		if(GetClosestVehicle(playerid) == newcar) {
+			if(VehicleInfo[newcar][vOwnerType] != VEHICLE_OWNER_TYPE_NONE && VehicleInfo[newcar][vOwnerType] != VEHICLE_OWNER_TYPE_SERVER) {
+				mainStr[0] = EOS;
+				format(mainStr, sizeof(mainStr), "W³aœciciel: %s", GetVehicleOwnerName(newcar));
+				SendClientMessage(playerid, COLOR_YELLOW, mainStr);
+			}
+		}
+
 		gLastCar[playerid] = newcar;
 		gLastDriver[newcar] = playerid;
 	}
+
 	if(newstate == PLAYER_STATE_SPAWNED)
 	{
 		new Float: lwx, Float:lwy, Float:lwz;
@@ -2663,6 +2702,33 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		TelePos[playerid][1] = 0.0;
 		gPlayerSpawned[playerid] = 1;
 		SafeTime[playerid] = 60;
+	}
+	return 1;
+}
+
+sampCallback OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
+	if(PRESSED(KEY_ACTION)) {
+		if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
+			new vehicleid = GetPlayerVehicleID(playerid);
+
+			if(GetClosestVehicle(playerid) == vehicleid) {
+				SetTimerEx("VehicleEngineStarting", 10, false, "i", vehicleid);
+			}
+		}
+	}
+
+	if(PRESSED(KEY_FIRE)) {
+		if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
+			new vehicleid = GetPlayerVehicleID(playerid);
+
+			if(GetClosestVehicle(playerid) == vehicleid) {
+				if(!VehicleInfo[vehicleid][vLightsOn]) {
+					SetTimerEx("VehicleLightsOn", 10, false, "i", vehicleid);
+				} else {
+					SetTimerEx("VehicleLightsOff", 10, false, "i", vehicleid);
+				}
+			}
+		}
 	}
 	return 1;
 }
@@ -2992,5 +3058,24 @@ Callback LoadIntro(playerid) {
 			mysql_free_result();
 		}
 	}
+	return 1;
+}
+
+Callback RelogCharacter(playerid) {
+	GetPlayerName(playerid, PlayerInfo[playerid][pName], 24);
+	SetPlayerName(playerid, accName[playerid]);
+
+	PlayerPlaySound(playerid, 1187, 0.0, 0.0, 0.0);
+
+	for(new i = 0; i < 4; i++) {
+		TextDrawShowForPlayer(playerid, Intro[i]);
+	}
+
+	SetPlayerCameraPos(playerid, 2902.5500, -1953.4100, 106.9900);
+	SetPlayerCameraLookAt(playerid, 2901.5400, -1953.3800, 106.8900);
+
+	mainStr[0] = EOS;
+	format(mainStr, sizeof(mainStr), "Opcje konta %s:", accName[playerid]);
+	osrp_ShowPlayerDialog(playerid, DIALOG_ACCOUNT_OPTIONS, DIALOG_STYLE_LIST, mainStr, "{FFFFFF}Zaloguj siê na postaæ\nStwórz now¹ postaæ\nUsuñ istniej¹c¹ postaæ\nAnty Crash\nZmieñ has³o do konta", "Dalej", "");
 	return 1;
 }

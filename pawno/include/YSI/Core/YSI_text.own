@@ -573,12 +573,12 @@ Notes:
 	Wrapper for the possibly remote Langs_ function.
 -*----------------------------------------------------------------------------*/
 
-#if defined _YSI_CORE_PLAYER
+#if defined _LOCAL
 	#define Text_GetPlayerLanguage(%1) \
 		Player_GetPlayerLanguage((%1))
 #else
 	#define Text_GetPlayerLanguage(%1) \
-		Language:Language_GetPlayerLanguage((%1))
+		Language:CallRemoteFunction("Player_GetPlayerLanguage", "i", (%1))
 #endif
 
 /*----------------------------------------------------------------------------*-

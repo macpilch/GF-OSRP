@@ -18,6 +18,7 @@
 #include "src\defines"
 #include "src\enums"
 #include "src\variables"
+#include "src\systems\vehicle"
 #include "src\textdraws"
 #include "src\callbacks"
 #include "src\dialogs"

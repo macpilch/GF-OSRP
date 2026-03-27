@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------*\
+/*----------------------------------------------------------------------------*-
 					=================================
 					 y_inttest - Internal test code!
 					=================================
@@ -17,17 +17,17 @@ Legal:
 	for the specific language governing rights and limitations under the
 	License.
 	
-	The Original Code is the second YSI test include.
+	The Original Code is the SA:MP script information include.
 	
 	The Initial Developer of the Original Code is Alex "Y_Less" Cole.
-	Portions created by the Initial Developer are Copyright (C) 2011
+	Portions created by the Initial Developer are Copyright (C) 2008
 	the Initial Developer. All Rights Reserved.
 	
 	Contributors:
-		ZeeX, koolk, JoeBullet/Google63, g_aSlice/Slice
+		ZeeX, koolk
 	
 	Thanks:
-		JoeBullet/Google63 - Handy arbitrary ASM jump code using SCTRL.
+		Peter, Cam - Support.
 		ZeeX - Very productive conversations.
 		koolk - IsPlayerinAreaEx code.
 		TheAlpha - Danish translation.
@@ -42,16 +42,15 @@ Legal:
 		Matite - Pestering me to release it and using it.
 	
 	Very special thanks to:
-		Thiadmer - PAWN, whose limits continue to amaze me!
+		Thiadmer - PAWN.
 		Kye/Kalcor - SA:MP.
 		SA:MP Team past, present and future - SA:MP.
-	
 Version:
 	1.0
 Changelog:
 	29/11/10:
 		First version
-\*----------------------------------------------------------------------------*/
+-*----------------------------------------------------------------------------*/
 
 #if !defined _YSI_ALLOW_INTERNAL_TEST
 	#endinput
@@ -73,11 +72,8 @@ static
 
 //inttestxxx
 //checkpoint
-foreign Inttest_Create(val);
-
-global Inttest_Create(val)
+RF:Inttest_Create[i](val)
 {
-	P:2("Inttest_Create called: %i", val);
 	new
 		i = 0;
 	while (i != MAX_INTERNAL_TEST_ITEMS && gElements[i] != -1)
@@ -97,9 +93,7 @@ global Inttest_Create(val)
 	return i;
 }
 
-foreign Inttest_SetPlayer(element, playerid, bool:set);
-
-global Inttest_SetPlayer(element, playerid, bool:set)
+RF@v:Inttest_SetPlayer[iii](element, playerid, bool:set)
 //Inttest_SetPlayer(element, playerid, set)
 {
 	Bit_Set(gPlayers[element], playerid, set);

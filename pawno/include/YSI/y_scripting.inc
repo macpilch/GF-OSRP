@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------*\
+/*----------------------------------------------------------------------------*-
 					===============================
 					 y_scripting - Access amx data
 					===============================
@@ -19,17 +19,17 @@ Legal:
 	for the specific language governing rights and limitations under the
 	License.
 	
-	The Original Code is the YSI scripting include.
+	The Original Code is the SA:MP script information include.
 	
 	The Initial Developer of the Original Code is Alex "Y_Less" Cole.
-	Portions created by the Initial Developer are Copyright (C) 2011
+	Portions created by the Initial Developer are Copyright (C) 2008
 	the Initial Developer. All Rights Reserved.
 	
 	Contributors:
-		ZeeX, koolk, JoeBullet/Google63, g_aSlice/Slice
+		ZeeX, koolk
 	
 	Thanks:
-		JoeBullet/Google63 - Handy arbitrary ASM jump code using SCTRL.
+		Peter, Cam - Support.
 		ZeeX - Very productive conversations.
 		koolk - IsPlayerinAreaEx code.
 		TheAlpha - Danish translation.
@@ -44,18 +44,17 @@ Legal:
 		Matite - Pestering me to release it and using it.
 	
 	Very special thanks to:
-		Thiadmer - PAWN, whose limits continue to amaze me!
+		Thiadmer - PAWN.
 		Kye/Kalcor - SA:MP.
 		SA:MP Team past, present and future - SA:MP.
-	
 Version:
-	2.0
+	1.0
 Changelog:
 	06/08/10:
 		First version
-\*----------------------------------------------------------------------------*/
+-*----------------------------------------------------------------------------*/
 
-#include <a_samp>
+#include <YSI\internal\y_version>
 
 #include <YSI\internal\y_funcinc>
 
@@ -149,7 +148,7 @@ static stock Scripting_GetLibraries()
 static stock Scripting_GetString(addr)
 {
 	new
-		str[33],
+		str[32],
 		buffer,
 		ch,
 		idx;
@@ -174,7 +173,7 @@ static stock Scripting_GetString(addr)
 		// Check for the end of the string.
 		if (!ch) break;
 		// Write a character to the buffer.
-		ch = buffer >> 24;
+		ch = buffer >>> 24;
 		str[idx++] = ch;
 		// Check for the end of the string.
 		if (!ch) break;
@@ -188,7 +187,7 @@ static stock Scripting_GetString(addr)
 static stock Scripting_GetStringFast(addr, buffer)
 {
 	new
-		str[33],
+		str[32],
 		ch,
 		idx;
 	do
@@ -223,7 +222,7 @@ static stock Scripting_GetStringFast(addr, buffer)
 	return str;
 }
 
-/*----------------------------------------------------------------------------*\
+/*----------------------------------------------------------------------------*-
 Function:
 	Scripting_GetPublicsCount
 Params:
@@ -235,7 +234,7 @@ Notes:
 
 native Scripting_GetPublicsCount();
 
-\*----------------------------------------------------------------------------*/
+-*----------------------------------------------------------------------------*/
 
 stock Scripting_GetPublicsCount()
 {
@@ -249,7 +248,7 @@ stock Scripting_GetPublicsCount()
 	return s_count;
 }
 
-/*----------------------------------------------------------------------------*\
+/*----------------------------------------------------------------------------*-
 Function:
 	Scripting_GetNativesCount
 Params:
@@ -261,7 +260,7 @@ Notes:
 
 native Scripting_GetNativesCount();
 
-\*----------------------------------------------------------------------------*/
+-*----------------------------------------------------------------------------*/
 
 stock Scripting_GetNativesCount()
 {
@@ -275,196 +274,376 @@ stock Scripting_GetNativesCount()
 	return s_count;
 }
 
-/*----------------------------------------------------------------------------*\
+/*----------------------------------------------------------------------------*-
 Function:
 	Scripting_GetPublicFast
 Params:
-	idx - Index of the public to get.
-	buffer[33] - Buffer to store the name in.
+	idx - Index of the public to start at.
+	buffer[32] - Buffer to store the name in.
 	search - Pattern matching parameter.
 Return:
 	Index of next public.
 Notes:
-	Gets a string starting with a know 4 character sequence.
+	Gets a string starting with a known 4 character sequence.
 
-native Scripting_GetPublicFast(idx, buffer[33], search);
+native Scripting_GetPublicFast(idx, buffer[32], search);
 
-\*----------------------------------------------------------------------------*/
+-*----------------------------------------------------------------------------*/
 
-stock Scripting_GetPublicFast(idx, buffer[33], search)
+stock Scripting_GetPublicFast(idx, buffer[32], search)
 {
 	new
 		count = Scripting_GetPublicsCount(),
 		base = Scripting_GetBase(),
-		publics = Scripting_GetPublics();
+		pos = idx * 8 + 4 + Scripting_GetPublics(),
+		addr;
 	while (idx < count)
 	{
 		// Get the offset in the public records.
-		new
-			pos = idx * 8 + 4;
 		// Get the pointer to the string.
-		pos += publics;
+		//pos += publics;
 		// Get the address of the string.
 		#emit LREF.S.pri                pos
-		#emit STOR.S.pri                pos
+		#emit STOR.S.pri                addr
 		//printf("%s", Scripting_GetString(Scripting_GetBase() + pos));
 		//new
-		//	str[33] = Scripting_GetString(base + pos));
+		//	str[32] = Scripting_GetString(base + pos));
 		++idx;
-		pos += base;
+		addr += base;
 		new
 			chars;
-		#emit LREF.S.pri                pos
+		#emit LREF.S.pri                addr
 		#emit STOR.S.pri                chars
 		if (chars == search)
 		{
-			buffer = Scripting_GetStringFast(pos, chars);
+			buffer = Scripting_GetStringFast(addr, chars);
 			return idx;
 		}
+		pos += 8;
 	}
 	buffer[0] = '\0';
 	return 0;
 }
 
-/*----------------------------------------------------------------------------*\
+/*----------------------------------------------------------------------------*-
 Function:
-	Scripting_GetNative
+	Scripting_GetPublicSuffix
+Params:
+	idx - Index of the public to start at.
+	buffer[32] - Buffer to store the name in.
+	search - Pattern matching parameter.
+Return:
+	Index of next public.
+Notes:
+	Gets a string ending with a known 4 character sequence.
+
+native Scripting_GetPublicFast(idx, buffer[32], search);
+
+-*----------------------------------------------------------------------------*/
+
+stock Scripting_GetPublicSuffix(idx, buffer[32], search)
+{
+	new
+		count = Scripting_GetPublicsCount(),
+		base = Scripting_GetBase(),
+		// Add 12 to get the pointer to the next string.
+		pos = idx * 8 + 12 + Scripting_GetPublics(),
+		addr;
+	// This code will actually spill in to the natives record, but that's fine.
+	while (idx < count)
+	{
+		// Get the address of the string.
+		#emit LREF.S.pri                pos
+		#emit STOR.S.pri                addr
+		++idx;
+		addr = addr + base - 5;
+		//addr
+		#emit LREF.S.pri                addr
+		#emit STOR.S.pri                addr
+		if (addr == search)
+		{
+			pos -= 8;
+			#emit LREF.S.pri            pos
+			#emit STOR.S.pri            addr
+			addr += base;
+			buffer = Scripting_GetString(addr);
+			return idx;
+		}
+		pos += 8;
+	}
+	buffer[0] = '\0';
+	return 0;
+}
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Scripting_GetNativeFast
 Params:
 	idx - Index of the native to get.
-	buffer[33] - Buffer to store the name in.
+	buffer[32] - Buffer to store the name in.
 	search - Pattern matching parameter.
 Return:
 	Index of next native.
 Notes:
 	-
 
-native Scripting_GetNativeFast(idx, buffer[33], search);
+native Scripting_GetNativeFast(idx, buffer[32], search);
 
-\*----------------------------------------------------------------------------*/
+-*----------------------------------------------------------------------------*/
 
-stock Scripting_GetNativeFast(idx, buffer[33], search)
+stock Scripting_GetNativeFast(idx, buffer[32], search)
 {
 	new
 		count = Scripting_GetNativesCount(),
 		base = Scripting_GetBase(),
-		publics = Scripting_GetNatives();
+		pos = idx * 8 + 4 + Scripting_GetNatives()
+		addr;
 	while (idx < count)
 	{
 		// Get the offset in the public records.
 		new
-			pos = idx * 8 + 4;
 		// Get the pointer to the string.
-		pos += publics;
+		//pos += publics;
 		// Get the address of the string.
 		#emit LREF.S.pri                pos
-		#emit STOR.S.pri                pos
+		#emit STOR.S.pri                addr
 		//printf("%s", Scripting_GetString(Scripting_GetBase() + pos));
 		//new
-		//	str[33] = Scripting_GetString(base + pos));
+		//	str[32] = Scripting_GetString(base + pos));
 		++idx;
-		pos += base;
+		addr += base;
 		new
 			chars;
-		#emit LREF.S.pri                pos
+		#emit LREF.S.pri                addr
 		#emit STOR.S.pri                chars
 		if (chars == search)
 		{
-			buffer = Scripting_GetStringFast(pos, chars);
+			buffer = Scripting_GetStringFast(addr, chars);
 			return idx;
 		}
+		pos += 8;
 	}
 	buffer[0] = '\0';
 	return 0;
 }
 
-/*----------------------------------------------------------------------------*\
+/*----------------------------------------------------------------------------*-
 Function:
 	Scripting_GetPublic
 Params:
 	idx - Index of the public to get.
-	buffer[33] - Buffer to store the name in.
+	buffer[32] - Buffer to store the name in.
 	search[] - Optional pattern matching parameter.
 Return:
 	Index of next public.
 Notes:
 	-
 
-native Scripting_GetPublic(idx, buffer[33], search[] = "");
+native Scripting_GetPublic(idx, buffer[32], search[] = "");
 
-\*----------------------------------------------------------------------------*/
+-*----------------------------------------------------------------------------*/
 
-stock Scripting_GetPublic(idx, buffer[33], search[] = "")
+stock Scripting_GetPublic(idx, buffer[32], search[] = "")
 {
 	new
 		count = Scripting_GetPublicsCount(),
 		base = Scripting_GetBase(),
-		publics = Scripting_GetPublics();
+		pos = idx * 8 + 4 + Scripting_GetPublics(),
+		addr;
 	while (idx < count)
 	{
 		// Get the offset in the public records.
-		new
-			pos = idx * 8 + 4;
 		// Get the pointer to the string.
-		pos += publics;
+		//pos += publics;
 		// Get the address of the string.
 		#emit LREF.S.pri                pos
-		#emit STOR.S.pri                pos
+		#emit STOR.S.pri                addr
 		//printf("%s", Scripting_GetString(Scripting_GetBase() + pos));
 		//new
-		//	str[33] = Scripting_GetString(base + pos));
+		//	str[32] = Scripting_GetString(base + pos));
 		++idx;
-		buffer = Scripting_GetString(base + pos);
+		buffer = Scripting_GetString(base + addr);
 		if (search[0] == '\0' || strfind(buffer, search) != -1)
 		{
 			return idx;
 		}
+		pos += 8;
 	}
 	buffer[0] = '\0';
 	return 0;
 }
 
-/*----------------------------------------------------------------------------*\
+/*----------------------------------------------------------------------------*-
 Function:
 	Scripting_GetNative
 Params:
 	idx - Index of the native to get.
-	buffer[33] - Buffer to store the name in.
+	buffer[32] - Buffer to store the name in.
 	search[] - Optional pattern matching parameter.
 Return:
 	Index of next native.
 Notes:
 	-
 
-native Scripting_GetNative(idx, buffer[33], search[] = "");
+native Scripting_GetNative(idx, buffer[32], search[] = "");
 
-\*----------------------------------------------------------------------------*/
+-*----------------------------------------------------------------------------*/
 
-stock Scripting_GetNative(idx, buffer[33], search[] = "")
+stock Scripting_GetNative(idx, buffer[32], search[] = "")
 {
 	new
 		count = Scripting_GetNativesCount(),
 		base = Scripting_GetBase(),
-		publics = Scripting_GetNatives();
+		pos = idx * 8 + 4 + Scripting_GetNatives(),
+		addr;
 	while (idx < count)
 	{
 		// Get the offset in the public records.
-		new
-			pos = idx * 8 + 4;
 		// Get the pointer to the string.
-		pos += publics;
+		//pos += publics;
 		// Get the address of the string.
 		#emit LREF.S.pri                pos
-		#emit STOR.S.pri                pos
+		#emit STOR.S.pri                addr
 		//printf("%s", Scripting_GetString(Scripting_GetBase() + pos));
 		//new
-		//	str[33] = Scripting_GetString(base + pos));
+		//	str[32] = Scripting_GetString(base + pos));
 		++idx;
-		buffer = Scripting_GetString(base + pos);
+		buffer = Scripting_GetString(base + addr);
 		if (search[0] == '\0' || strfind(buffer, search) != -1)
 		{
 			return idx;
 		}
+		pos += 8;
 	}
 	buffer[0] = '\0';
 	return 0;
+}
+
+static stock Scripting_CompareString(str[], addr)
+{
+	new
+		buffer,
+		ch,
+		idx;
+	do
+	{
+		// Read 4 bytes.
+		#emit LREF.S.pri                addr
+		#emit STOR.S.pri                buffer
+		ch = buffer & 0xFF;
+		if (ch != str[idx++]) return false;
+		if (!ch) break;
+		ch = buffer >> 8 & 0xFF;
+		if (ch != str[idx++]) return false;
+		if (!ch) break;
+		ch = buffer >> 16 & 0xFF;
+		if (ch != str[idx++]) return false;
+		if (!ch) break;
+		ch = buffer >>> 24;
+		if (ch != str[idx++]) return false;
+		if (!ch) break;
+		addr += 4;
+	}
+	while (idx < 32);
+	return true;
+}
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Scripting_GetPublicPointer
+Params:
+	name[] - Name of the function to get the pointer for.
+Return:
+	Pointer or -1.
+Notes:
+	-
+
+native Scripting_GetPublicPointer(name[]);
+
+-*----------------------------------------------------------------------------*/
+
+stock Scripting_GetPublicPointer(name[])
+{
+	new
+		count = Scripting_GetPublicsCount(),
+		base = Scripting_GetBase(),
+		pos = 4 + Scripting_GetPublics(),
+		addr;
+	while (count--)
+	{
+		// Get the offset in the public records.
+		// Get the pointer to the string.
+		//pos += publics;
+		// Get the address of the string.
+		#emit LREF.S.pri                pos
+		#emit STOR.S.pri                addr
+		//printf("%s", Scripting_GetString(Scripting_GetBase() + pos));
+		//new
+		//	str[32] = Scripting_GetString(base + pos));
+		if (Scripting_CompareString(name, base + addr))
+		{
+			//pos = idx * 8 + publics;
+			pos -= 4;
+			// Get the pointer to the string.
+			//pos += publics;
+			// Get the address of the string.
+			#emit LREF.S.pri            pos
+			#emit STOR.S.pri            addr
+			// It doesn't really matter what this is relative to, as long as the
+			// usage in code is consistent.
+			return addr;
+		}
+		pos += 8;
+	}
+	return -1;
+}
+
+/*----------------------------------------------------------------------------*-
+Function:
+	Scripting_RedirectPublic
+Params:
+	name[] - Name of the function to move.
+	pointer - Where to move it to.
+Return:
+	-
+Notes:
+	-
+
+native Scripting_RedirectPublic(name[], pointer);
+
+-*----------------------------------------------------------------------------*/
+
+stock Scripting_RedirectPublic(name[], pointer)
+{
+	new
+		count = Scripting_GetPublicsCount(),
+		base = Scripting_GetBase(),
+		pos = 4 + Scripting_GetPublics(),
+		addr;
+	while (count--)
+	{
+		// Get the offset in the public records.
+		// Get the pointer to the string.
+		//pos += publics;
+		// Get the address of the string.
+		#emit LREF.S.pri                pos
+		#emit STOR.S.pri                addr
+		//printf("%s", Scripting_GetString(Scripting_GetBase() + pos));
+		//new
+		//	str[32] = Scripting_GetString(base + pos));
+		if (Scripting_CompareString(name, base + addr))
+		{
+			//pos = idx * 8 + publics;
+			pos -= 4;
+			// Get the pointer to the string.
+			//pos += publics;
+			// Get the address of the string.
+			#emit LOAD.S.pri            pointer
+			#emit SREF.S.pri            pos
+			// It doesn't really matter what this is relative to, as long as the
+			// usage in code is consistent.
+			return;
+		}
+		pos += 8;
+	}
 }

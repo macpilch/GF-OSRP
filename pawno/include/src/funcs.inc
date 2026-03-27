@@ -323,16 +323,12 @@ stock ExtortionSBiz(bizid, money)
 	return 1;
 }
 
-stock DollahScoreUpdate()
-{
+stock DollahScoreUpdate() {
 	new LevScore;
-	for(new i=0; i<MAX_PLAYERS; i++)
-	{
-		if(IsPlayerConnected(i))
-		{
-   			LevScore = PlayerInfo[i][pLevel];
-			SetPlayerScore(i, LevScore);
-		}
+
+	foreach(new i : Player) {
+   		LevScore = PlayerInfo[i][pLevel];
+		SetPlayerScore(i, LevScore);
 	}
 	return 1;
 }
@@ -2720,7 +2716,7 @@ stock OnPlayerLogin(playerid, name[]) {
 		format(PlayerInfo[playerid][pName], 24, name);
 
 		queryStr[0] = EOS;
-		strcat(queryStr, "SELECT `Level`, `AdminLevel`, `DonateRank`, `UpgradePoints`, `ConnectedTime`, `Registered`, `Sex`, `Age`, `Continent`, `Origin`, `CK`, `Muted`, `Respect`, ");
+		strcat(queryStr, "SELECT `ID`, `Level`, `AdminLevel`, `DonateRank`, `UpgradePoints`, `ConnectedTime`, `Registered`, `Sex`, `Age`, `Continent`, `Origin`, `CK`, `Muted`, `Respect`, ");
 		strcat(queryStr, "`Money`, `Bank`, `Crimes`, `Kills`, `Deaths`, `Arrested`, `WantedDeaths`, `Phonebook`, `LottoNr`, `Fishes`, `BiggestFish`, `Job`, `Paycheck`, `HeadValue`, ");
 		strcat(queryStr, "`Jailed`, `JailTime`, `Materials`, `Drugs`, `Leader`, `Member`, `FMember`, `Rank`, `Char`, `ContractTime`, `DetSkill`, `SexSkill`, `BoxSkill`, `LawSkill`, ");
 		strcat(queryStr, "`MechSkill`, `JackSkill`, `CarSkill`, `NewsSkill`, `DrugsSkill`, `CookSkill`, `FishSkill`, `pSHealth`, `pHealth`, `Int`, `Local`, `Team`, `Model`, `PhoneNr`, ");
@@ -2738,7 +2734,8 @@ stock OnPlayerLogin(playerid, name[]) {
 
 		if(mysql_result_stored()) {
 			mysql_fetch_row(queryStr, "|");
-			sscanf(queryStr, "p<|>iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiiiiifffiiiiiiiiiiiiiiiiiiiiiiiiiiis[128]",
+			sscanf(queryStr, "p<|>iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiiiiiiifffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiis[128]",
+				PlayerInfo[playerid][pID],
 				PlayerInfo[playerid][pLevel],
 				PlayerInfo[playerid][pAdmin],
 				PlayerInfo[playerid][pDonateRank],
@@ -2927,6 +2924,7 @@ stock OnPlayerLogin(playerid, name[]) {
 	}
 
 	gPlayerLogged[playerid] = 1;
+	createdChar[playerid] = false;
 	SpawnPlayer(playerid);
 	DateProp(playerid);
 
@@ -3244,19 +3242,6 @@ stock SendAdminMessage(color, string[])
 	}
 }
 
-stock AddCar(carcoords)
-{
-	new randcol = random(126);
-	new randcol2 = 1;
-	if (rccounter == 14)
-	{
-		rccounter = 0;
-	}
-	AddStaticVehicleEx(carselect[rccounter], CarSpawns[carcoords][pos_x], CarSpawns[carcoords][pos_y], CarSpawns[carcoords][pos_z], CarSpawns[carcoords][z_angle], randcol, randcol2, 60000);
-	rccounter++;
-	return 1;
-}
-
 stock PlayerPlayMusic(playerid)
 {
 	if(IsPlayerConnected(playerid))
@@ -3279,12 +3264,9 @@ stock StopMusic()
 
 stock PlayerFixRadio(playerid)
 {
-    if(IsPlayerConnected(playerid))
-	{
-	    SetTimer("PlayerFixRadio2", 1000, 0);
-		PlayerPlaySound(playerid, 1068, 0.0, 0.0, 0.0);
-		Fixr[playerid] = 1;
-	}
+	SetTimer("PlayerFixRadio2", 1000, 0);
+	PlayerPlaySound(playerid, 1068, 0.0, 0.0, 0.0);
+	Fixr[playerid] = 1;
 }
 
 stock PlayerFixRadio2()
@@ -3295,7 +3277,7 @@ stock PlayerFixRadio2()
 		{
 			if(Fixr[i])
 			{
-				PlayerPlaySound(i, 1069, 0.0, 0.0, 0.0);
+				PlayerPlaySound(i, 0, 0.0, 0.0, 0.0);
 				Fixr[i] = 0;
 			}
 		}
@@ -3529,4 +3511,11 @@ stock GetPlayerOrigin(playerid) {
 		}
 	}
 	return origin;
+}
+
+stock FloatToInt(Float:fVal) {
+	new str[32];
+
+	format(str, sizeof(str), "%f", fVal);
+	return strval(str);
 }

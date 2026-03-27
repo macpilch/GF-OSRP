@@ -266,6 +266,7 @@ sampCallback OnDialogResponse(playerid, dialogid, response, listitem, inputtext[
 				new name[24], tmp[64];
 
 				sscanf(inputtext, "s[24]s[64]", name, tmp);
+				printf("Login: %s", name);
 				OnPlayerLogin(playerid, name);
 			}
 		}
@@ -457,6 +458,80 @@ sampCallback OnDialogResponse(playerid, dialogid, response, listitem, inputtext[
 			}
 
 			TutTime[playerid] = 1;
+		}
+		case DIALOG_ADMIN_VEHICLE: {
+			if(!response) {
+				return 1;
+			}
+
+			new vehName[32], tmp[8];
+
+			sscanf(inputtext, "s[32]s[8]", vehName, tmp);
+
+			if(GetVehicleModelIDFromName(vehName) != -1) {
+				AdminVehModelID = GetVehicleModelIDFromName(vehName);
+
+				osrp_ShowPlayerDialog(playerid, DIALOG_ADMIN_VEHICLE_COLOR, DIALOG_STYLE_INPUT, "Dodawanie Pojazdu (Kolor):", "{FFFFFF}Podaj kolor pojazdu np. (0, 0): ", "Dalej", "Cofnij");
+			}
+		}
+		case DIALOG_ADMIN_VEHICLE_COLOR: {
+			if(!response) {
+				callcmd::dodajpojazd(playerid, "");
+				return 1;
+			}
+
+			new color[2];
+
+			sscanf(inputtext, "p<,>ii", color[0], color[1]);
+
+			AdminVehColor[0] = color[0];
+			AdminVehColor[1] = color[1];
+
+			osrp_ShowPlayerDialog(playerid, DIALOG_ADMIN_VEHICLE_OWNER, DIALOG_STYLE_INPUT, "Dodawanie Pojazdu (W³aœciciel):", "{FFFFFF}Podaj w³aœciciela pojazdu (ID, Typ):\nTypy:\n-1 - Nikt\n0 - Server\n1 - Gracz\n2 Biznes", "Dalej", "Cofnij");
+		}
+		case DIALOG_ADMIN_VEHICLE_OWNER: {
+			if(!response) {
+				return osrp_ShowPlayerDialog(playerid, DIALOG_ADMIN_VEHICLE_COLOR, DIALOG_STYLE_INPUT, "Dodawanie Pojazdu (Kolor):", "{FFFFFF}Podaj kolor pojazdu np. (0, 0): ", "Dalej", "Cofnij");
+			}
+
+			new ownerParms[2];
+
+			sscanf(inputtext, "p<,>ii", ownerParms[0], ownerParms[1]);
+
+			AdminVehOwner[0] = ownerParms[0];
+			AdminVehOwner[1] = ownerParms[1];
+
+			mainStr[0] = EOS;
+			format(mainStr, sizeof(mainStr), "{FFFFFF}Nazwa: %s\nKolor1: %d, Kolor2: %d\nID Ownera: %d\nTyp Ownera: %d",
+				VehicleNames[AdminVehModelID - 400],
+				AdminVehColor[0],
+				AdminVehColor[1],
+				AdminVehOwner[0],
+				AdminVehOwner[1]
+			);
+
+			osrp_ShowPlayerDialog(playerid, DIALOG_ADMIN_VEHICLE_SUMMARY, DIALOG_STYLE_MSGBOX, "Dodawanie Pojazdu (Podsumowanie):", mainStr, "Stwórz", "Cofnij");
+		}
+		case DIALOG_ADMIN_VEHICLE_SUMMARY: {
+			if(!response) {
+				return osrp_ShowPlayerDialog(playerid, DIALOG_ADMIN_VEHICLE_OWNER, DIALOG_STYLE_INPUT, "Dodawanie Pojazdu (W³aœciciel):", "{FFFFFF}Podaj w³aœciciela pojazdu (ID, Typ):\nTypy:\n-1 - Nikt\n0 - Server\n1 - Gracz\n2 Biznes", "Dalej", "Cofnij");
+			}
+
+			new Float:PosX, Float:PosY, Float:PosZ, Float:PosA;
+
+			GetPlayerPos(playerid, PosX, PosY, PosZ);
+			GetPlayerFacingAngle(playerid, PosA);
+
+			PosX += 2.0;
+			PosY += 1.0;
+
+			AddVehicle(AdminVehOwner[0], AdminVehOwner[1], AdminVehModelID, 0, AdminVehColor[0], AdminVehColor[1], 1, PosX, PosY, PosZ, PosA);
+
+			AdminVehModelID = 0;
+			AdminVehOwner[0] = 0;
+			AdminVehOwner[1] = 0;
+			AdminVehColor[0] = 0;
+			AdminVehColor[1] = 0;
 		}
 	}
 	return 1;

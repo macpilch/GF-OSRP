@@ -7,14 +7,11 @@
 	Desc: Server timers.
 */
 
-task SyncUp[60000]() {
-	SyncTime();
-	DollahScoreUpdate();
-}
-
-task SetPlayerUnjail[1000]() {
+Timer:GlobalTimer[1000]() {
 	new plname[MAX_PLAYER_NAME];
 	new string[256];
+    new Float:maxspeed = 175.0;
+	new Float:oldposx, Float:oldposy, Float:oldposz;
 	if(PaintballPlayers >= 2 && PaintballRound != 1 && StartingPaintballRound != 1)
 	{
 		StartingPaintballRound = 1;
@@ -705,19 +702,6 @@ task SetPlayerUnjail[1000]() {
 				PlayerInfo[i][pJailTime] = 300;
 				PlayerInfo[i][pJailed] = 1;
 			}
-		}
-	}
-}
-
-task OtherTimer[1000]() {
-    new Float:maxspeed = 175.0;
-    new plname[MAX_PLAYER_NAME];
-	new string[256];
-	new Float:oldposx, Float:oldposy, Float:oldposz;
-    for(new i = 0; i < MAX_PLAYERS; i++)
-	{
-	    if(IsPlayerConnected(i))
-	    {
             if(SafeTime[i] > 0)
 			{
 				SafeTime[i]--;
@@ -787,18 +771,8 @@ task OtherTimer[1000]() {
 					{
 						if(house > 10000)
 						{
-							new tmpcar = GetPlayerVehicleID(i);
 							if (!PlayerToPoint(6, i,1040.6,-1021.0,31.7) && house == 10001 ||!PlayerToPoint(6, i,-2720.5,217.5,4.1) && house == 10002 ||!PlayerToPoint(6, i,2644.6,-2044.9,13.3) && house == 10003)
 							{
-								if (GetPlayerState(i) == 2)
-								{
-									SetVehiclePos(tmpcar, HouseCarSpawns[tmpcar-1][0], HouseCarSpawns[tmpcar-1][1], HouseCarSpawns[tmpcar-1][2]);
-									SetVehicleZAngle(tmpcar, HouseCarSpawns[tmpcar-1][3]);
-								}
-								else
-								{
-									SetPlayerPos(i, HouseCarSpawns[tmpcar-1][0], HouseCarSpawns[tmpcar-1][1], HouseCarSpawns[tmpcar-1][2]);
-								}
 								new oldcash = gSpentCash[i];
 								new Total = GetPlayerMoney(i) - oldcash;
 								printf("Total %d = GetPlayerMoney(playerid) %d - oldcash %d",Total,GetPlayerMoney(i),oldcash);
@@ -896,12 +870,81 @@ task OtherTimer[1000]() {
 			    format(string, sizeof(string), "~r~%d ~w~: ~g~$%d",TransportTime[i],TransportCost[i]);
 			    GameTextForPlayer(i, string, 15000, 6);
 			}
+
+			foreach(new j : VehItter) {
+				if(VehicleInfo[j][vSpawned]) {
+					if(VehicleInfo[j][vEngine]) {
+						GetVehicleHealth(j, VehicleInfo[j][vEngineHp]);
+
+						switch(GetVehicleSpeed(j)) {
+							case 1 .. 50: {
+								VehicleInfo[j][vFuel] -= 0.01;
+							}
+							case 51 .. 90: {
+								VehicleInfo[j][vFuel] -= 0.04;
+							}
+							case 91 .. 120: {
+								VehicleInfo[j][vFuel] -= 0.05;
+							}
+							case 121 .. 220: {
+								VehicleInfo[j][vFuel] -= 0.1;
+							}
+							default: {
+								VehicleInfo[j][vFuel] -= 0.001;
+							}
+						}
+
+						if(GetVehicleSpeed(j) > 0) {
+							CountVehicleMileage(j);
+						}
+
+						if(IsPlayerInAnyVehicle(i) && GetPlayerVehicleID(i) == j) {
+							new str[256];
+
+							if(VehicleInfo[j][vLock]) {
+								format(str, sizeof(str), "~g~OTWARTY");
+							} else {
+								format(str, sizeof(str), "~r~ZAMKNIETY");
+							}
+
+							if(VehicleInfo[j][vEngine]) {
+								format(str, sizeof(str), "%s~n~~n~~w~SILNIK: ~g~ON", str);
+							} else {
+								format(str, sizeof(str), "%s~n~~n~~w~SILNIK: ~r~OFF", str);
+							}
+
+							format(str, sizeof(str), "%s~n~~w~DIESEL: %0.1f L~n~~n~PREDKOSC: %d KM/H~n~ PRZEBIEG: %d", str, VehicleInfo[j][vFuel], GetVehicleSpeed(j), FloatToInt(VehicleInfo[j][vMileage]));
+							TextDrawSetString(VehicleStats[i], str);
+
+							TextDrawShowForPlayer(i, VehicleStats[i]);
+						}
+
+						if(VehicleInfo[j][vFuel] < 0.0) {
+							new engine, lights, alarm, doors, bonnet, boot, objective;
+
+							VehicleInfo[j][vFuel] = 0.0;
+							VehicleInfo[j][vEngine] = false;
+
+							GetVehicleParamsEx(j, engine, lights, alarm, doors, bonnet, boot, objective);
+							SetVehicleParamsEx(j, VehicleInfo[j][vEngine], lights, alarm, doors, bonnet, boot, objective);
+
+							if(IsPlayerInVehicle(i, j)) {
+								SendClientMessage(i, COLOR_YELLOW, "Skoñczy³o Ci siê paliwo w pojeŸdzie. Silnik zosta³ wy³¹czony.");
+							}
+						}
+					}
+				}
+			}
 		}
 	}
-	return 1;
 }
 
-task CarCheck[30000]() {
+Timer:SyncUp[60000]() {
+	SyncTime();
+	DollahScoreUpdate();
+}
+
+Timer:CarCheck[30000]() {
 	new string[256];
 	for(new j = 0; j<MAX_PLAYERS; j++)
 	{
@@ -980,7 +1023,7 @@ task CarCheck[30000]() {
 	return 1;
 }
 
-task CustomPickups[1000]() {
+Timer:CustomPickups[1000]() {
 	new Float:oldposx, Float:oldposy, Float:oldposz;
 	new string[128];
 	for(new i = 0; i < MAX_PLAYERS; i++)
@@ -1283,7 +1326,7 @@ task CustomPickups[1000]() {
 	return 1;
 }
 
-task Spectator[2000]() {
+Timer:Spectator[2000]() {
 	new string[256];
 	for(new i = 0; i < MAX_PLAYERS; i++)
 	{
@@ -1373,7 +1416,7 @@ task Spectator[2000]() {
 	}
 }
 
-task IdleKick[600000]() {
+Timer:IdleKick[600000]() {
 	foreach(new i : Player)
 	{
 		if(PlayerInfo[i][pAdmin] < 1)
@@ -1390,7 +1433,7 @@ task IdleKick[600000]() {
 	}
 }
 
-task Production[300000]() {
+Timer:Production[300000]() {
 	new string[256];
 	for(new i = 0; i < MAX_PLAYERS; i++)
 	{
@@ -1436,7 +1479,7 @@ task Production[300000]() {
 	}
 }
 
-task SaveAccounts[1800000]() {
+Timer:SaveAccounts[1800000]() {
     for(new i = 0; i < MAX_PLAYERS; i++)
 	{
 		if(IsPlayerConnected(i))
@@ -1453,7 +1496,7 @@ task SaveAccounts[1800000]() {
 	}
 }
 
-task CheckGas[15000]() {
+Timer:CheckGas[15000]() {
 	new string[256];
 	for(new i=0;i<MAX_PLAYERS;i++)
 	{
@@ -1483,7 +1526,7 @@ task CheckGas[15000]() {
 	return 1;
 }
 
-task StoppedVehicle[15000]() {
+Timer:StoppedVehicle[15000]() {
 	new Float:x,Float:y,Float:z;
 	new Float:distance,value;
 	for(new i=0; i<MAX_PLAYERS; i++)

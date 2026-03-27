@@ -10,10 +10,13 @@
 #undef MAX_PLAYERS
 #define MAX_PLAYERS 20
 
+#undef MAX_VEHICLES
+#define MAX_VEHICLES 100
+
 #define MAX_PLAYER_CHARS 5
 
 // Rozmiar stosu:
-#pragma dynamic 2048
+#pragma dynamic 8096
 
 // Callbacks:
 #define sampCallback%0(%1) \
@@ -35,6 +38,11 @@
 // Strona:
 #define WEBSITE_NAME ""
 #define WEBSITE_URL ""
+
+#define PRESSED(%0) \
+	(((newkeys & (%0)) == (%0)) && ((oldkeys & (%0)) != (%0)))
+
+#define Distance(%0,%1,%2,%3,%4,%5) (((%0 - %3) * (%0 - %3)) + ((%1 - %4) * (%1 - %4)) + ((%2 - %5) * (%2 - %5)))
 
 // Kolory:
 #define COLOR_GRAD1 0xB4B5B7FF
@@ -100,11 +108,16 @@
 #define DIALOG_ACCOUNT_CHAR_ORIGIN 14
 #define DIALOG_ACCOUNT_CHAR_SUMMARY 15
 #define DIALOG_TUTORIAL 16
+#define DIALOG_ADMIN_VEHICLE 100
+#define DIALOG_ADMIN_VEHICLE_COLOR 101
+#define DIALOG_ADMIN_VEHICLE_OWNER 102
+#define DIALOG_ADMIN_VEHICLE_SUMMARY 103
 
 // Domyslne
-#define DEFAULT_POS_X 1742.7944
-#define DEFAULT_POS_Y -1864.1165
-#define DEFAULT_POS_Z 13.5742
+#define DEFAULT_POS_X 2390.1865
+#define DEFAULT_POS_Y -1547.7513
+#define DEFAULT_POS_Z 24.1641
+#define DEFAULT_POS_A 1.0928
 
 #define DEFAULT_EUROPE_MALE_SKIN 291
 #define DEFAULT_EUROPE_FEMALE_SKIN 93
@@ -134,6 +147,34 @@
 #define GasMax 100
 #define RefuelWait 5000
 #define CAR_AMOUNT 700 //Change to Your Vehicle Amount
+
+// Vehicle:
+#define VEHICLE_OWNER_NONE -1
+#define VEHICLE_OWNER_SERVER 0
+
+#define VEHICLE_OWNER_TYPE_NONE -1
+#define VEHICLE_OWNER_TYPE_SERVER 0
+#define VEHICLE_OWNER_TYPE_PLAYER 1
+#define VEHICLE_OWNER_TYPE_BUSSINES 2
+
+#define VEHICLE_ENGINE_NONE 0
+#define VEHICLE_ENGINE_PETROL 1
+#define VEHICLE_ENGINE_DIESEL 2
+#define VEHICLE_ENGINE_ELECTRIC 3
+#define VEHICLE_ENGINE_BIKE 4
+
+#define VEHICLE_WINDOW_NON_STATE -1
+#define VEHICLE_WINDOW_OPENED 0
+#define VEHICLE_WINDOW_CLOSED 1
+
+#define VEHICLE_ACCESSORIES_NONE 0
+#define VEHICLE_ACCESSORIES_DOOR_LOCKS 1
+#define VEHICLE_ACCESSORIES_ALARM 2
+
+#define VEHICLE_SAVE_NONE 0
+#define VEHICLE_SAVE_POS 1
+#define VEHICLE_SAVE_ENGINE 2
+#define VEHICLE_SAVE_SPAWN 3
 
 // Funcs:
 forward Float:GetDistanceBetweenPlayers(p1, p2);

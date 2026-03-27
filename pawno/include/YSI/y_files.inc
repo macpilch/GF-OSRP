@@ -1,4 +1,4 @@
-/**--------------------------------------------------------------------------**\
+/*----------------------------------------------------------------------------*-
 							========================
 							 y_files - Include File 
 							========================
@@ -17,35 +17,20 @@ Legal:
 	for the specific language governing rights and limitations under the
 	License.
 	
-	The Original Code is the YSI files include.
+	The Original Code is the YSI 2.0 SA:MP plugin.
 	
 	The Initial Developer of the Original Code is Alex "Y_Less" Cole.
-	Portions created by the Initial Developer are Copyright (C) 2011
+	Portions created by the Initial Developer are Copyright (C) 2008
 	the Initial Developer. All Rights Reserved.
 	
-	Contributors:
-		ZeeX, koolk, JoeBullet/Google63, g_aSlice/Slice
+	Contributor(s):
 	
-	Thanks:
-		JoeBullet/Google63 - Handy arbitrary ASM jump code using SCTRL.
-		ZeeX - Very productive conversations.
-		koolk - IsPlayerinAreaEx code.
-		TheAlpha - Danish translation.
-		breadfish - German translation.
-		Fireburn - Dutch translation.
-		yom - French translation.
-		50p - Polish translation.
-		Zamaroht - Spanish translation.
-		Dracoblue, sintax, mabako, Xtreme, other coders - Producing other modes
-			for me to strive to better.
-		Pixels^ - Running XScripters where the idea was born.
-		Matite - Pestering me to release it and using it.
+	Peter Beverloo
+	Marcus Bauer
 	
-	Very special thanks to:
-		Thiadmer - PAWN, whose limits continue to amaze me!
-		Kye/Kalcor - SA:MP.
-		SA:MP Team past, present and future - SA:MP.
+	Special Thanks to:
 	
+	SA:MP Team past, present and future
 Version:
 	0.1
 Changelog:
@@ -85,15 +70,13 @@ Compile options:
 	-
 Operators:
 	-
-</remarks>
-\**--------------------------------------------------------------------------**/
+-*----------------------------------------------------------------------------*/
 
-/**--------------------------------------------------------------------------**\
+/*----------------------------------------------------------------------------*-
 					=================
 					 y_ini Libraries
 					=================
-</remarks>
-\**--------------------------------------------------------------------------**/
+-*----------------------------------------------------------------------------*/
 
 // File functions
 native ffind(const pattern[], filename[], len, &idx);

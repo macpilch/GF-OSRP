@@ -259,11 +259,7 @@ stock Default_OnGameModeInit()
 		#endif
 	#else
 		if (Default_Setup()) ret = 1;
-		#if defined _YSI_SETUP_MASTER
-			setproperty(0, "YSIM_Gamemode", YSI_gMasterID);
-		#else
-			setproperty(0, "YSIM_Gamemode", -1);
-		#endif
+		setproperty(0, "YSIM_Gamemode", YSI_gMasterID);
 	#endif
 	return ret;
 }
