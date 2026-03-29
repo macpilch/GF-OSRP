@@ -58,6 +58,11 @@ CMD:relog(playerid, params[]) {
 	return 1;
 }
 
+CMD:pasy(playerid, params[]) {
+	
+	return 1;
+}
+
 CMD:zegarek(playerid, params[]) {
 	new mtext[20];
 	new year, month,day;
@@ -91,6 +96,7 @@ CMD:zegarek(playerid, params[]) {
 		format(mainStr, sizeof(mainStr), "~y~%d %s~n~~g~|~w~%d:%d~g~|", day, mtext, hour, minuite);
 	}
 
+	ApplyAnimation(playerid, "PLAYIDLES", "TIME", 4.1, 0, 0, 0, 0, 0);
 	GameTextForPlayer(playerid, mainStr, 5000, 1);
 
 	mainStr[0] = EOS;
@@ -126,6 +132,25 @@ CMD:b(playerid, params[]) {
 	return 1;
 }
 
+CMD:krzyk(playerid, params[]) {
+	if(!gPlayerLogged[playerid]) {
+		return SendClientMessage(playerid, COLOR_GREY, "Nie jesteœ zalogowany.");
+	}
+
+	new result[64];
+
+	if(sscanf(params, "s[64]", result)) {
+		return SendClientMessage(playerid, COLOR_GRAD2, "Wpisz: (/s)krzyk [wiadomoœæ]");
+	}
+
+	format(mainStr, sizeof(mainStr), "%s krzyczy: %s!", PlayerInfo[playerid][pName], result);
+	ProxDetector(30.0, playerid, mainStr,COLOR_WHITE,COLOR_WHITE,COLOR_WHITE,COLOR_FADE1,COLOR_FADE2);
+	printf("%s", mainStr);
+	return 1;
+}
+
+alias:krzyk("s")
+
 CMD:me(playerid, params[]) {
 	if(!gPlayerLogged[playerid]) {
 		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jesteœ zalogowany.");
@@ -144,6 +169,8 @@ CMD:me(playerid, params[]) {
 	printf("%s", mainStr);
 	return 1;
 }
+
+alias:me("ja")
 
 CMD:do(playerid, params[]) {
 	if(!gPlayerLogged[playerid]) {
@@ -164,22 +191,70 @@ CMD:do(playerid, params[]) {
 	return 1;
 }
 
+CMD:megafon(playerid, params[]) {
+	new tmpcar = GetPlayerVehicleID(playerid);
+	new result[64];
+
+	if(sscanf(params, "s[64]", result)) {
+		return SendClientMessage(playerid, COLOR_GRAD2, "Uzycie: (/m)egaphone [megaphone chat]");
+	}
+
+	if(gTeam[playerid] == 2 || IsACop(playerid)) {
+		if(!IsACopCar(tmpcar)) {
+			return SendClientMessage(playerid, COLOR_GRAD2, "   You are not in a Police Vehicle !");
+		}
+
+		if(PlayerInfo[playerid][pMember] == 1||PlayerInfo[playerid][pLeader] == 1) {
+			format(mainStr, sizeof(mainStr), "[Oficer %s:o< %s]", PlayerInfo[playerid][pName], result);
+			ProxDetector(60.0, playerid, mainStr,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW);
+		} else if(PlayerInfo[playerid][pMember] == 2||PlayerInfo[playerid][pLeader] == 2) {
+			format(mainStr, sizeof(mainStr), "[Agent %s:o< %s]", PlayerInfo[playerid][pName], result);
+			ProxDetector(60.0, playerid, mainStr,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW);
+		} else if(PlayerInfo[playerid][pMember] == 3||PlayerInfo[playerid][pLeader] == 3) {
+			format(mainStr, sizeof(mainStr), "[Soldier %s:o< %s]", PlayerInfo[playerid][pName], result);
+			ProxDetector(60.0, playerid, mainStr,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW);
+		}
+		printf("%s", mainStr);
+	} else {
+		SendClientMessage(playerid, COLOR_GRAD2, "   You are not part of a Team !");
+	}
+	return 1;
+}
+
+alias:megaphone("m")
+
 CMD:zamek(playerid, params[]) {
 	if(GetClosestVehicle(playerid) != INVALID_VEHICLE_ID) {
 		new vehicleid = GetClosestVehicle(playerid);
 
-		if(!VehicleInfo[vehicleid][vLock]) {
-			VehicleInfo[vehicleid][vLock] = true;
+		if(!IsVehicleOwner(playerid, vehicleid)) {
+			return SendClientMessage(playerid, COLOR_GRAD1, "Nie masz klucza do tego pojazdu.");
+		}
+
+		if(GetPlayerState(playerid) == PLAYER_STATE_ONFOOT) {
+			ApplyAnimation(playerid, "INT_HOUSE", "wash_up", 4.1, 0, 0, 0, 0, 0);
+		}
+
+		if(VehicleInfo[vehicleid][vLocked]) {
+			VehicleInfo[vehicleid][vLocked] = false;
+			GameTextForPlayer(playerid, "~n~~n~~n~~w~Pojazd ~g~otwarty", 3000, 3);
 
 			mainStr[0] = EOS;
 			format(mainStr, sizeof(mainStr), "* %s przekrêca kluczyk i otwiera pojazd.", PlayerInfo[playerid][pName]);
 			ProxDetector(30.0, playerid, mainStr, COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE);
 		} else {
-			VehicleInfo[vehicleid][vLock] = false;
+			VehicleInfo[vehicleid][vLocked] = true;
+			GameTextForPlayer(playerid, "~n~~n~~n~~w~Pojazd ~r~zamkniety", 3000, 3);
 
 			mainStr[0] = EOS;
 			format(mainStr, sizeof(mainStr), "* %s przekrêca kluczyk i zamyka pojazd.", PlayerInfo[playerid][pName]);
 			ProxDetector(30.0, playerid, mainStr, COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE);
+		}
+
+		SaveVehicleData(vehicleid, VEHICLE_SAVE_LOCKED);
+
+		foreach(new i : Player) {
+			SetVehicleParamsForPlayer(vehicleid, i, 0, VehicleInfo[vehicleid][vLocked]);
 		}
 	} else {
 		SendClientMessage(playerid, COLOR_GRAD1, "Nie ma przed tob¹ ¿adnego pojazdu.");
@@ -192,14 +267,15 @@ CMD:dodajpojazd(playerid, params[]) {
 		return SendClientMessage(playerid, COLOR_GRAD1, "Nie posiadasz uprawnieñ do u¿ywania tej komendy.");
 	}
 
-	new str[1024];
-	strcat(str, "{FFFFFF}Model pojazdu\tID pojazdu\n");
+	new str[3000];
+
+	strcat(str, "{FFFFFF}Model pojazdu\t{FFFFFF}ID pojazdu\n");
 
 	for(new i = 0; i < sizeof(VehicleNames); i++) {
-		format(str, sizeof(str), "%s\n%s\t%d", str, VehicleNames[i], i + 400);
+		format(str, sizeof(str), "%s\n{FFFFFF}%s\t%d", str, VehicleNames[i], i + 400);
 	}
 
-	osrp_ShowPlayerDialog(playerid, DIALOG_ADMIN_VEHICLE, DIALOG_STYLE_TABLIST_HEADERS, "Dodawanie Pojazdu (Model):", str, "Dalej", "Cofnij");
+	osrp_ShowPlayerDialog(playerid, DIALOG_ADMIN_VEHICLE, DIALOG_STYLE_TABLIST_HEADERS, "Wybierz model pojazdu:", str, "Dalej", "Anuluj");
 	return 1;
 }
 
@@ -1137,57 +1213,6 @@ CMD:close(playerid, params[]) {
 	printf("%s", mainStr);
 	return 1;
 }
-
-CMD:shout(playerid, params[]) {
-	if(!gPlayerLogged[playerid]) {
-		return SendClientMessage(playerid, COLOR_GREY, "   You havent logged in yet !");
-	}
-
-	new result[64];
-
-	if(sscanf(params, "s[64]", result)) {
-		return SendClientMessage(playerid, COLOR_GRAD2, "Uzycie: (/s)hout [local chat]");
-	}
-
-	format(mainStr, sizeof(mainStr), "%s Shouts: %s!!", PlayerInfo[playerid][pName], result);
-	ProxDetector(30.0, playerid, mainStr,COLOR_WHITE,COLOR_WHITE,COLOR_WHITE,COLOR_FADE1,COLOR_FADE2);
-	printf("%s", mainStr);
-	return 1;
-}
-
-alias:shout("s")
-
-CMD:megaphone(playerid, params[]) {
-	new tmpcar = GetPlayerVehicleID(playerid);
-	new result[64];
-
-	if(sscanf(params, "s[64]", result)) {
-		return SendClientMessage(playerid, COLOR_GRAD2, "Uzycie: (/m)egaphone [megaphone chat]");
-	}
-
-	if(gTeam[playerid] == 2 || IsACop(playerid)) {
-		if(!IsACopCar(tmpcar)) {
-			return SendClientMessage(playerid, COLOR_GRAD2, "   You are not in a Police Vehicle !");
-		}
-
-		if(PlayerInfo[playerid][pMember] == 1||PlayerInfo[playerid][pLeader] == 1) {
-			format(mainStr, sizeof(mainStr), "[Officer %s:o< %s]", PlayerInfo[playerid][pName], result);
-			ProxDetector(60.0, playerid, mainStr,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW);
-		} else if(PlayerInfo[playerid][pMember] == 2||PlayerInfo[playerid][pLeader] == 2) {
-			format(mainStr, sizeof(mainStr), "[Agent %s:o< %s]", PlayerInfo[playerid][pName], result);
-			ProxDetector(60.0, playerid, mainStr,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW);
-		} else if(PlayerInfo[playerid][pMember] == 3||PlayerInfo[playerid][pLeader] == 3) {
-			format(mainStr, sizeof(mainStr), "[Soldier %s:o< %s]", PlayerInfo[playerid][pName], result);
-			ProxDetector(60.0, playerid, mainStr,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW,COLOR_YELLOW);
-		}
-		printf("%s", mainStr);
-	} else {
-		SendClientMessage(playerid, COLOR_GRAD2, "   You are not part of a Team !");
-	}
-	return 1;
-}
-
-alias:megaphone("m")
 
 CMD:radio(playerid, params[]) {
 	new result[64];

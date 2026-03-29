@@ -266,7 +266,8 @@ enum pInfo
 	pMarried,
 	pMarriedTo[128],
 	pDialog,
-	bool:pToggle
+	bool:pToggle,
+	bool:pFreeze
 };
 
 enum hInfo
@@ -457,7 +458,7 @@ enum vInfo {
 	vColor[2],
 	Float:vPos[4],
 	Float:vFuel,
-	bool:vLock,
+	bool:vLocked,
 	bool:vEngine,
 	Float:vEngineHp, // Stan silnika
 	bool:vSpawned,

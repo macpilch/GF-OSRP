@@ -14,6 +14,8 @@
 #define MAX_VEHICLES 100
 
 #define MAX_PLAYER_CHARS 5
+#define MAX_TRASH_JOB_OBJECTS 24
+#define MAX_BUSH_JOB_OBJECTS 20
 
 // Rozmiar stosu:
 #pragma dynamic 8096
@@ -174,7 +176,8 @@
 #define VEHICLE_SAVE_NONE 0
 #define VEHICLE_SAVE_POS 1
 #define VEHICLE_SAVE_ENGINE 2
-#define VEHICLE_SAVE_SPAWN 3
+#define VEHICLE_SAVE_LOCKED 4
+#define VEHICLE_SAVE_MILEAGE 8
 
 // Funcs:
 forward Float:GetDistanceBetweenPlayers(p1, p2);

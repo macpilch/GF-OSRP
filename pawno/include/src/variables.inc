@@ -23,6 +23,8 @@ new bool:accLastCrash[MAX_PLAYERS];
 new bool:loadedIntro[MAX_PLAYERS];
 new bool:createdChar[MAX_PLAYERS];
 new bool:VehAnim[MAX_PLAYERS];
+new bool:pTrashZone[MAX_PLAYERS];
+new bool:pBushZone[MAX_PLAYERS];
 
 new AdminVehModelID;
 new AdminVehColor[2];
@@ -218,7 +220,6 @@ new numplayers = 0;
 new dollah = 1000; // Amount player recieves on spawn.
 new realtime = 1;
 new wtime = 15;
-new levelcost = 25000;
 new callcost = 10; //20 seconds
 new realchat = 1;
 new timeshift = -1;
