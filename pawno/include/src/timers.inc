@@ -913,13 +913,13 @@ Timer:GlobalTimer[1000]() {
 						}
 					}
 
-					if(IsPlayerInAnyVehicle(i) && GetPlayerVehicleID(i) == j) {
+					if(IsPlayerInVehicle(i, j) && GetPlayerVehicleID(i) == j) {
 						new str[256];
 
-						if(VehicleInfo[j][vLock]) {
-							format(str, sizeof(str), "~g~OTWARTY");
-						} else {
+						if(VehicleInfo[j][vLocked]) {
 							format(str, sizeof(str), "~r~ZAMKNIETY");
+						} else {
+							format(str, sizeof(str), "~g~OTWARTY");
 						}
 
 						if(VehicleInfo[j][vEngine]) {
@@ -936,6 +936,13 @@ Timer:GlobalTimer[1000]() {
 				}
 			}
 		}
+	}
+}
+
+Timer:CasualJobTimer[250]() {
+	foreach(new i : Player) {
+		TrashJobPickUpObject(i);
+		BushJobPickUpObject(i);
 	}
 }
 

@@ -37,6 +37,16 @@ stock osrp_TogglePlayerSpectating(playerid, toggle) {
 	TogglePlayerSpectating(playerid, toggle);
 }
 
+stock osrp_TogglePlayerControllable(playerid, toggle) {
+	if(!toggle) {
+		PlayerInfo[playerid][pFreeze] = true;
+	} else {
+		PlayerInfo[playerid][pFreeze] = false;
+	}
+
+	TogglePlayerControllable(playerid, toggle);
+}
+
 stock GeneratePasswordSalt() {
 	new salt[17];
 
@@ -1476,7 +1486,7 @@ stock PrintBizInfo(playerid,targetid)
 }
 
 stock ShowStats(playerid, targetid) {
-	new cash =  GetPlayerMoney(targetid);
+	/*new cash =  GetPlayerMoney(targetid);
 	new atext[20];
 
 	if(PlayerInfo[targetid][pSex] == 1) { atext = "Male"; }
@@ -1646,20 +1656,20 @@ stock ShowStats(playerid, targetid) {
 	new warrests = PlayerInfo[targetid][pWantedDeaths];
 	new drugs = PlayerInfo[targetid][pDrugs];
 	new mats = PlayerInfo[targetid][pMats];
-	new wanted = WantedLevel[targetid];
+	new wanted = WantedLevel[targetid];*/
 	new level = PlayerInfo[targetid][pLevel];
 	new exp = PlayerInfo[targetid][pExp];
-	new kills = PlayerInfo[targetid][pKills];
-	new pnumber = PlayerInfo[targetid][pPnumber];
-	new account = PlayerInfo[targetid][pAccount];
+	//new kills = PlayerInfo[targetid][pKills];
+	//new pnumber = PlayerInfo[targetid][pPnumber];
+	//new account = PlayerInfo[targetid][pAccount];
 	new nxtlevel = PlayerInfo[targetid][pLevel]+1;
 	new expamount = nxtlevel*levelexp;
-	new costlevel = nxtlevel*levelcost;//10k for testing purposes
+	//new costlevel = nxtlevel*levelcost;//10k for testing purposes
 	new housekey = PlayerInfo[targetid][pPhousekey];
 	new bizkey = PlayerInfo[targetid][pPbiskey];
 	new intir = PlayerInfo[targetid][pInt];
 	new local = PlayerInfo[targetid][pLocal];
-	new Float:shealth = PlayerInfo[targetid][pSHealth];
+	//new Float:shealth = PlayerInfo[targetid][pSHealth];
 	new coordsstring[256];
 
 	format(coordsstring, sizeof(coordsstring), "___________________ Nick OOC: %s ___________________", accName[playerid]);
@@ -2300,7 +2310,9 @@ stock SyncTime() {
 		BroadCast(COLOR_WHITE, string);
 
 		ghour = tmphour;
+
 		PayDay();
+		CreateTrashJobObjects();
 
 		if(realtime) {
 			SetWorldTime(tmphour);
@@ -3408,23 +3420,48 @@ stock ProxDetectorS(Float:radi, playerid, targetid)
 	return 0;
 }
 
-stock PlayerToPoint(Float:radi, playerid, Float:x, Float:y, Float:z)
-{
-    if(IsPlayerConnected(playerid))
-	{
-		new Float:oldposx, Float:oldposy, Float:oldposz;
-		new Float:tempposx, Float:tempposy, Float:tempposz;
-		GetPlayerPos(playerid, oldposx, oldposy, oldposz);
-		tempposx = (oldposx -x);
-		tempposy = (oldposy -y);
-		tempposz = (oldposz -z);
-		//printf("DEBUG: X:%f Y:%f Z:%f",posx,posy,posz);
-		if (((tempposx < radi) && (tempposx > -radi)) && ((tempposy < radi) && (tempposy > -radi)) && ((tempposz < radi) && (tempposz > -radi)))
-		{
-			return 1;
-		}
+stock PlayerToPoint(Float:radi, playerid, Float:x, Float:y, Float:z) {
+	new Float:oldposx, Float:oldposy, Float:oldposz;
+	new Float:tempposx, Float:tempposy, Float:tempposz;
+
+	GetPlayerPos(playerid, oldposx, oldposy, oldposz);
+
+	tempposx = (oldposx -x);
+	tempposy = (oldposy -y);
+	tempposz = (oldposz -z);
+
+	if(((tempposx < radi) && (tempposx > -radi)) && ((tempposy < radi) && (tempposy > -radi)) && ((tempposz < radi) && (tempposz > -radi))) {
+		return 1;
 	}
 	return 0;
+}
+
+stock IsPlayerFacingObject(playerid, objectid) {
+	new Float:pX, Float:pY, Float:pZ, Float:obX, Float:obY, Float:obZ, Float:Angle, Float:pAngle;
+
+	GetDynamicObjectPos(objectid, obX, obY, obZ);
+	GetPlayerPos(playerid, pX, pY, pZ);
+
+	if(obY > pY) {
+		Angle = (-acos((obX - pX) / floatsqroot((obX - pX) * (obX - pX) + (obY - pY) * (obY - pY))) - 90.0);
+	} else if(obY < pY && obX < pX) {
+		Angle = (acos((obX - pX) / floatsqroot((obX - pX) * (obX - pX) + (obY - pY) * (obY - pY))) - 450.0);
+	} else if(obY < pY) {
+		Angle = (acos((obX - pX) / floatsqroot((obX - pX) * (obX - pX) + (obY - pY) * (obY - pY))) - 90.0);
+	}
+
+	if(obX > pX) {
+		Angle = (floatabs(floatabs(Angle) + 180.0));
+	} else {
+		Angle = (floatabs(Angle) - 180.0);
+	}
+
+	GetPlayerFacingAngle(playerid, pAngle);
+
+	if(Angle - pAngle < -130 || Angle - pAngle > 130) {
+		return 0;
+	}
+	return 1;
 }
 
 stock SetCamBack(playerid)

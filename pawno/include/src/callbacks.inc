@@ -38,8 +38,11 @@ sampCallback OnGameModeInit() {
 	LoadCK();
 	LoadTurfs();
 	LoadPapers();*/
+	InitServerObjects();
 	TextDrawsInit();
 	InitVehicleData();
+	CreateTrashJobObjects();
+	CreateBushJobObjects();
 
 	News[hTaken1] = 0; News[hTaken2] = 0; News[hTaken3] = 0; News[hTaken4] = 0; News[hTaken5] = 0;
 	format(string, sizeof(string), "Nothing");
@@ -551,11 +554,11 @@ sampCallback OnPlayerSpawn(playerid)
 	{
 		gTeam[playerid] = 3;
 	}
-	/*if(gPlayerLogged[playerid] == 0)
+	if(gPlayerLogged[playerid] == 0)
 	{
     	SendClientMessage(playerid, COLOR_LIGHTRED, "** This server requires a Login BEFORE spawn (Kicked) **");
         KickPlayer[playerid] = 1;
- 	}*/
+ 	}
 	if(gTeam[playerid] == 11 && PlayerInfo[playerid][pLeader] < 1)
 	{
 	    new rand = random(sizeof(CIV));
@@ -638,7 +641,8 @@ sampCallback OnPlayerSpawn(playerid)
 	SetPlayerWeapons(playerid);
 	SetPlayerSpawn(playerid);
 	SetPlayerToTeamColor(playerid);
-	PlayerFixRadio(playerid);
+	PlayerPlaySound(playerid, 1186, 0.0, 0.0, 0.0);
+	SetPlayerWorldBounds(playerid, 20000.0, -20000.0, 20000.0, -20000.0);
 	for(new i = 0; i < sizeof(Turfs); i++)
 	{
 	    GangZoneShowForPlayer(playerid, i, TurfInfo[i][zColor]);
@@ -983,17 +987,20 @@ sampCallback OnPlayerDeath(playerid, killerid, reason)
 }
 
 sampCallback OnVehicleSpawn(vehicleid) {
+	SetVehicleNumberPlate(vehicleid, VehicleInfo[vehicleid][vPlate]);
+	SetVehicleHealth(vehicleid, VehicleInfo[vehicleid][vEngineHp]);
+	SetVehicleToRespawn(vehicleid);
+
+	VehicleInfo[vehicleid][vSpawned] = true;
 	return 1;
 }
 
-/*sampCallback OnVehicleStreamIn(vehicleid, forplayerid) {
-	SetVehicleNumberPlate(vehicleid, VehicleInfo[vehicleid][vPlate]);
-	SetVehicleToRespawn(vehicleid);
-
-	SetVehicleHealth(vehicleid, VehicleInfo[vehicleid][vEngineHp]);
-	SetVehicleParamsForPlayer(vehicleid, forplayerid, 0, VehicleInfo[vehicleid][vLock]);
+sampCallback OnVehicleStreamIn(vehicleid, forplayerid) {
+	if(VehicleInfo[vehicleid][vSpawned]) {
+		SetVehicleParamsForPlayer(vehicleid, forplayerid, false, VehicleInfo[vehicleid][vLocked]);
+	}
 	return 1;
-}*/
+}
 
 sampCallback OnVehicleDeath(vehicleid, killerid)
 {
@@ -2286,8 +2293,34 @@ sampCallback OnRconCommand(cmd[])
 	return 1;
 }
 
-public OnPlayerRequestSpawn(playerid) {
+sampCallback OnPlayerRequestSpawn(playerid) {
 	return 0;
+}
+
+sampCallback OnPlayerEnterDynamicArea(playerid, areaid) {
+	if(areaid == TrashJobZone) {
+		pTrashZone[playerid] = true;
+	}
+
+	if(areaid == BushJobZone) {
+		pBushZone[playerid] = true;
+	}
+	return 1;
+}
+
+sampCallback OnPlayerLeaveDynamicArea(playerid, areaid) {
+	if(areaid == TrashJobZone) {
+		pTrashZone[playerid] = false;
+	}
+
+	if(areaid == BushJobZone) {
+		pBushZone[playerid] = false;
+	}
+	return 0;
+}
+
+sampCallback OnPlayerPickUpDynamicPickup(playerid, pickupid) {
+	return 1;
 }
 
 sampCallback OnObjectMoved(objectid)
@@ -2296,11 +2329,6 @@ sampCallback OnObjectMoved(objectid)
 }
 
 sampCallback OnPlayerObjectMoved(playerid, objectid)
-{
-	return 1;
-}
-
-sampCallback OnPlayerPickUpPickup(playerid, pickupid)
 {
 	return 1;
 }
@@ -2360,9 +2388,12 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 			}
 		}
 
-		if(gLastCar[playerid] != INVALID_VEHICLE_ID) {
+		if(gLastCar[playerid] != 0) {
 			TextDrawHideForPlayer(playerid, VehicleStats[playerid]);
-			SaveVehicleData(gLastCar[playerid], VEHICLE_SAVE_SPAWN);
+			SaveVehicleData(gLastCar[playerid], VEHICLE_SAVE_POS | VEHICLE_SAVE_ENGINE | VEHICLE_SAVE_MILEAGE);
+
+			VehicleInfo[gLastCar[playerid]][vDriverID] = INVALID_PLAYER_ID;
+			gLastCar[playerid] = 0;
 		}
 
 		TelePos[playerid][0] = 0.0;
@@ -2660,6 +2691,8 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 				format(mainStr, sizeof(mainStr), "W³aœciciel: %s", GetVehicleOwnerName(newcar));
 				SendClientMessage(playerid, COLOR_YELLOW, mainStr);
 			}
+
+			VehicleInfo[newcar][vDriverID] = playerid;
 		}
 
 		gLastCar[playerid] = newcar;
