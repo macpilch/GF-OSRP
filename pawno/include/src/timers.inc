@@ -111,7 +111,7 @@ Timer:GlobalTimer[1000]() {
 			}
 			else
 			{
-				if(PlayerInfo[i][pCarLic] < 1 && IsPlayerInAnyVehicle(i) && GetPlayerState(i) == 2)
+				if(PlayerInfo[i][pCarLic] < 1 && IsPlayerInAnyVehicle(i) && GetPlayerState(i) == 2 && GetVehicleModel(newcar) != 572)
 				{
 					if(TakingLesson[i] == 1) { }
 				    else { RemovePlayerFromVehicle(i); }
@@ -874,23 +874,41 @@ Timer:GlobalTimer[1000]() {
 			foreach(new j : VehItter) {
 				if(VehicleInfo[j][vSpawned]) {
 					if(VehicleInfo[j][vEngine]) {
-						GetVehicleHealth(j, VehicleInfo[j][vEngineHp]);
-
-						switch(GetVehicleSpeed(j)) {
-							case 1 .. 50: {
-								VehicleInfo[j][vFuel] -= 0.01;
+						if(VehicleInfo[j][vEngineType] != 2) {
+							switch(GetVehicleSpeed(j)) {
+								case 1 .. 50: {
+									VehicleInfo[j][vFuel] -= 0.01;
+								}
+								case 51 .. 90: {
+									VehicleInfo[j][vFuel] -= 0.04;
+								}
+								case 91 .. 120: {
+									VehicleInfo[j][vFuel] -= 0.05;
+								}
+								case 121 .. 220: {
+									VehicleInfo[j][vFuel] -= 0.1;
+								}
+								default: {
+									VehicleInfo[j][vFuel] -= 0.001;
+								}
 							}
-							case 51 .. 90: {
-								VehicleInfo[j][vFuel] -= 0.04;
-							}
-							case 91 .. 120: {
-								VehicleInfo[j][vFuel] -= 0.05;
-							}
-							case 121 .. 220: {
-								VehicleInfo[j][vFuel] -= 0.1;
-							}
-							default: {
-								VehicleInfo[j][vFuel] -= 0.001;
+						} else {
+							switch(GetVehicleSpeed(j)) {
+								case 1 .. 50: {
+									VehicleInfo[j][vFuel] -= 0.1;
+								}
+								case 51 .. 90: {
+									VehicleInfo[j][vFuel] -= 0.4;
+								}
+								case 91 .. 120: {
+									VehicleInfo[j][vFuel] -= 0.5;
+								}
+								case 121 .. 220: {
+									VehicleInfo[j][vFuel] -= 1.0;
+								}
+								default: {
+									VehicleInfo[j][vFuel] -= 0.01;
+								}
 							}
 						}
 
@@ -917,21 +935,40 @@ Timer:GlobalTimer[1000]() {
 						new str[256];
 
 						if(VehicleInfo[j][vLocked]) {
-							format(str, sizeof(str), "~r~ZAMKNIETY");
+							format(str, sizeof(str), "~r~Zamkniety");
 						} else {
-							format(str, sizeof(str), "~g~OTWARTY");
+							format(str, sizeof(str), "~g~Otwarty");
 						}
 
 						if(VehicleInfo[j][vEngine]) {
-							format(str, sizeof(str), "%s~n~~n~~w~SILNIK: ~g~ON", str);
+							format(str, sizeof(str), "%s~n~~n~~w~Silnik: ~g~on", str);
 						} else {
-							format(str, sizeof(str), "%s~n~~n~~w~SILNIK: ~r~OFF", str);
+							format(str, sizeof(str), "%s~n~~n~~w~Silnik: ~r~off", str);
 						}
 
-						format(str, sizeof(str), "%s~n~~w~DIESEL: %0.1f L~n~~n~PREDKOSC: %d KM/H~n~ PRZEBIEG: %d", str, VehicleInfo[j][vFuel], GetVehicleSpeed(j), FloatToInt(VehicleInfo[j][vMileage]));
-						TextDrawSetString(VehicleStats[i], str);
+						if(VehicleInfo[j][vEngineType] != 2) {
+							if(VehicleInfo[j][vFuel] > 10.0) {
+								format(str, sizeof(str), "%s~n~~w~%s: %0.1f l", str, GetVehicleEngineTypeName(j), VehicleInfo[j][vFuel]);
+							} else {
+								format(str, sizeof(str), "%s~n~~w~%s: ~r~~h~~h~%0.1f l", str, GetVehicleEngineTypeName(j), VehicleInfo[j][vFuel]);
+							}
+						} else {
+							format(str, sizeof(str), "%s~n~~w~%s: %d %", str, GetVehicleEngineTypeName(j), FloatToInt(VehicleInfo[j][vFuel]));
+						}
 
-						TextDrawShowForPlayer(i, VehicleStats[i]);
+						if(VehicleInfo[j][vNitro] != -1.0) {
+							format(str, sizeof(str), "%s~n~Nitro: %0.1f l", str, VehicleInfo[j][vNitro]);
+						}
+
+						format(str, sizeof(str), "%s~n~~n~Predkosc: %d km/h~n~ Przebieg: %d km~n~_", str, GetVehicleSpeed(j), FloatToInt(VehicleInfo[j][vMileage]));
+
+						if(VehicleInfo[j][vNitro] == -1.0) {
+							TextDrawSetString(VehicleStats[i][0], str);
+							TextDrawShowForPlayer(i, VehicleStats[i][0]);
+						} else {
+							TextDrawSetString(VehicleStats[i][1], str);
+							TextDrawShowForPlayer(i, VehicleStats[i][1]);
+						}
 					}
 				}
 			}

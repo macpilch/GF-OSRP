@@ -7,6 +7,64 @@
 	Desc: Player commands.
 */
 
+CMD:p(playerid, params[]) {
+	osrp_ShowPlayerDialog(playerid, DIALOG_SHOW_ITEMS, DIALOG_STYLE_LIST, "Przedmioty:", "{FFFFFF}Zobacz swoje przedmioty", "Dalej", "Anuluj");
+	return 1;
+}
+
+CMD:pojazdy(playerid, params[]) {
+	new VehCount;
+	new title[64];
+
+	mainStr[0] = EOS;
+	strcat(mainStr, "{FFFFFF}Pojazd\t\t{FFFFFF}Przebieg\t{FFFFFF}Tablica\t{FFFFFF}Opis");
+
+	foreach(new i : VehItter) {
+		if(VehicleInfo[i][vOwnerType] == VEHICLE_OWNER_TYPE_PLAYER) {
+			if(VehicleInfo[i][vOwnerID] == PlayerInfo[playerid][pID]) {
+				if(VehicleInfo[i][vSpawned]) {
+					format(mainStr, sizeof(mainStr), "%s\n{FFC801}%s {FFFFFF}(id: %d)\t%d KM\t%s\t%s", mainStr, VehicleNames[VehicleInfo[i][vModelID] - 400], i, FloatToInt(VehicleInfo[i][vMileage]), VehicleInfo[i][vPlate], VehicleInfo[i][vDesc]);
+					VehCount++;
+				}
+			}
+		}
+	}
+
+	if(!VehCount) {
+		return SendClientMessage(playerid, COLOR_GRAD1, "Nie posiadasz ¿adnych pojazdów.");
+	}
+
+	format(title, sizeof(title), "{FFC801}Twoje pojazdy (Limit %d/%d):", VehCount, MAX_PLAYER_VEHS);
+	osrp_ShowPlayerDialog(playerid, DIALOG_SHOW_PLAYER_VEHICLES, DIALOG_STYLE_TABLIST_HEADERS, title, mainStr, "Wybierz", "Anuluj");
+	return 1;
+}
+
+CMD:admin(playerid, params[]) {
+	new msg[64];
+
+	if(sscanf(params, "s[64]", msg)) {
+		SendClientMessage(playerid, COLOR_GRAD2, "Wpisz: (/a)dmin [text]");
+		return 1;
+	}
+
+	mainStr[0] = EOS;
+
+	if(PlayerInfo[playerid][pAdmin] == 1) {
+		format(mainStr, sizeof(mainStr), "*%d Moderator %s: %s", PlayerInfo[playerid][pAdmin], accName[playerid], msg);
+	} else {
+		format(mainStr, sizeof(mainStr), "*%d Admin %s: %s", PlayerInfo[playerid][pAdmin], accName[playerid], msg);
+	}
+
+	if(PlayerInfo[playerid][pAdmin] >= 1) {
+		SendAdminMessage(COLOR_GREEN, mainStr);
+	}
+
+	printf("Admin %s: %s", PlayerInfo[playerid][pName], msg);
+	return 1;
+}
+
+alias:admin("a")
+
 CMD:gotocar(playerid, params[]) {
 	new testcar;
 
@@ -104,6 +162,8 @@ CMD:zegarek(playerid, params[]) {
 	ProxDetector(30.0, playerid, mainStr, COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE);
 	return 1;
 }
+
+alias:zegarek("czas")
 
 CMD:stats(playerid, params[]) {
 	if(!gPlayerLogged[playerid]) {
@@ -4237,26 +4297,6 @@ CMD:uncon(playerid, params[]) {
 	SetCamBack(playerid);
 	return 1;
 }
-
-CMD:admin(playerid, params[]) {
-	new result[64];
-
-	if(sscanf(params, "s[64]", result)) {
-		SendClientMessage(playerid, COLOR_GRAD2, "Uzycie: (/a)dmin [admin chat]");
-		return 1;
-	}
-
-	format(mainStr, sizeof(mainStr), "*%d Admin %s: %s", PlayerInfo[playerid][pAdmin], PlayerInfo[playerid][pName], result);
-
-	if(PlayerInfo[playerid][pAdmin] >= 1) {
-		SendAdminMessage(COLOR_YELLOW, mainStr);
-	}
-
-	printf("Admin %s: %s", PlayerInfo[playerid][pName], result);
-	return 1;
-}
-
-alias:admin("a")
 
 CMD:logout(playerid, params[]) {
 	if(PlayerInfo[playerid][pAdmin] >= 4) {

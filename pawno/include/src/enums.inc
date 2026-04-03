@@ -234,7 +234,9 @@ enum pInfo
 	Float:pPos_x,
 	Float:pPos_y,
 	Float:pPos_z,
+	Float:pPos_a,
 	pCarLic,
+	pBikeLic,
 	pFlyLic,
 	pBoatLic,
 	pFishLic,
@@ -436,14 +438,19 @@ enum kInfo
 	kToggle,
 };
 
-enum iInfo
-{
-	iAdmin[128],
-	iMOTD[128],
-	iPassword[128],
-	iNeedPass,
-	iLock,
-	iPlayers,
+enum iInfo {
+	iID,
+	iOwnerID,
+	iOwnerType,
+	iName[64],
+	iType,
+	iSubType,
+	iAmount,
+	Float:iPos[3],
+	bool:iUsed,
+	iObject,
+	iVw,
+	iInt
 };
 
 enum vInfo {
@@ -454,7 +461,7 @@ enum vInfo {
 	vAccessID[32], // -1 - all, 0 - only owner
 	vRentID,
 	vModelID, // vehicle modelid
-	vEngineType, // 0 - petrol, 1 - diesel, 2 - elektryk, -1 - rower
+	vEngineType, // -1 - rower, 0 - benzyna, 1 - diesel, 2 - elektryk, 3 - lotnicze
 	vColor[2],
 	Float:vPos[4],
 	Float:vFuel,
@@ -472,13 +479,13 @@ enum vInfo {
 	vVw,
 	vInt,
 	vPaintjob,
-	vNitro,
+	Float:vNitro, // -1 - Brak nitra
 	vComponents[14],
 	vDriverID,
 	Float:vRepair,
 	Float:vMileage, // Przebieg
 	vBlock,
 	Text3D:v3DDesc,
-	vDesc[128],
-	vPlate[32]
+	vPlate[32],
+	vDesc[128]
 };

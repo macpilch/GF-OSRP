@@ -120,7 +120,7 @@ stock CreateTrashJobObjects() {
 	}
 
 	TrashJobZone = CreateDynamicRectangle(2057.5337, -1251.2866, 1876.1093, -1144.9321, -1, -1, -1);
-	CreateDynamicMapIcon(1969.7532, -1198.8317, 25.6496, 56, 0, 0, -1, -1, 1000.0);
+	CreateDynamicMapIcon(1969.7532, -1198.8317, 25.6496, 56, 0, 0, -1, -1, 9999.0);
 
 	TrashJobObjectsInit = true;
 	return 1;
@@ -165,8 +165,8 @@ stock CreateBushJobObjects() {
 												 );
 	}
 
-	BushJobZone = CreateDynamicRectangle(2057.5337, -1251.2866, 1876.1093, -1144.9321, -1, -1, -1);
-	CreateDynamicMapIcon(1969.7532, -1198.8317, 25.6496, 56, 0, 0, -1, -1, 1000.0);
+	BushJobZone = CreateDynamicRectangle(1212.7601, -1992.0531, 1136.3495, -2081.7129, -1, -1, -1);
+	CreateDynamicMapIcon(1253.9507, -2030.7537, 59.5928, 56, 0, 0, -1, -1, 9999.0);
 
 	BushJobObjectsInit = true;
 	return 1;
@@ -177,7 +177,7 @@ stock CreateTrashJobObject(trashid, posid) {
 		return 1;
 	}
 
-	TrashJobObjects[trashid] = CreateDynamicObject(811,
+	TrashJobObjects[trashid] = CreateDynamicObject(2674,
 											 TrashJobObjectsPos[posid][0],
 											 TrashJobObjectsPos[posid][1],
 											 TrashJobObjectsPos[posid][2],
@@ -291,12 +291,10 @@ stock BushJobPickUpObject(playerid) {
 						for(new i = 0; i < MAX_BUSH_JOB_OBJECTS; i++) {
 							GetDynamicObjectPos(BushJobObjects[i], oX, oY, oZ);
 
-							if(PlayerToPoint(1.0, playerid, oX, oY, oZ)) {
+							if(PlayerToPoint(1.5, playerid, oX, oY, oZ)) {
 								if(IsValidDynamicObject(BushJobObjects[i]) && BushJobObjectsIsCreated[i]) {
-									if(IsPlayerFacingObject(playerid, BushJobObjects[i])) {
-										pFoundJobObject[playerid] = i;
-										break;
-									}
+									pFoundJobObject[playerid] = i;
+									break;
 								}
 							}
 						}
@@ -309,7 +307,7 @@ stock BushJobPickUpObject(playerid) {
 								SetVehicleVelocity(vehicleid, 0.0, 0.0, 0.0);
 							}
 
-							SetTimerEx("StopJobAction", 3500, false, "i", playerid);
+							SetTimerEx("StopJobAction", 4000, false, "i", playerid);
 							DestroyBushJobObject(pFoundJobObject[playerid]);
 
 							GameTextForPlayer(playerid, "~n~~g~Koszenie trawy~n~czekaj...", 2000, 3);
@@ -342,10 +340,6 @@ Callback StopJobAction(playerid) {
 
 			ConsumingMoney[playerid] = 1;
 			GivePlayerMoney(playerid, prize);
-
-			mainStr[0] = EOS;
-			format(mainStr, sizeof(mainStr), "~n~~w~Otrzymujesz: ~g~$%d", prize);
-			GameTextForPlayer(playerid, mainStr, 3000, 3);
 		}
 	}
 }

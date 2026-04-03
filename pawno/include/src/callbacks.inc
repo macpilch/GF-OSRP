@@ -17,8 +17,9 @@ sampCallback OnGameModeInit() {
 	ManualVehicleEngineAndLights();
 	ShowPlayerMarkers(PLAYER_MARKERS_MODE_OFF);
 	AddPlayerClassEx(0, 0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0);
+	SendRconCommand("hostname "SERVER_SHORT_NAME" @1shot1kill.pl");
 	AllowAdminTeleport(1);
-	SetGameModeText("OSRP v1.0");
+	SetGameModeText(""SERVER_SHORT_NAME" "SERVER_VERSION"");
 
 	ConnectingMySQL();
 
@@ -40,6 +41,7 @@ sampCallback OnGameModeInit() {
 	LoadPapers();*/
 	InitServerObjects();
 	TextDrawsInit();
+	InitItemData();
 	InitVehicleData();
 	CreateTrashJobObjects();
 	CreateBushJobObjects();
@@ -64,7 +66,7 @@ sampCallback OnGameModeInit() {
 
 	format(objstore, sizeof(objstore), "MOLE: I got nothing, check back with me later.");
 	format(cbjstore, sizeof(cbjstore), "HQ: There is nothing in your Vicinity, Out.");
-	format(motd, sizeof(motd), "Witaj na serwerze Old School Role Play.");
+	format(motd, sizeof(motd), "Witaj na serwerze "SERVER_NAME".");
 	gettime(ghour, gminute, gsecond);
 	FixHour(ghour);
 	ghour = shifthour;
@@ -84,12 +86,6 @@ sampCallback OnGameModeInit() {
 	for(new i = 0; i < sizeof(TurfInfo); i++)
 	{
 	    Turfs[i] = GangZoneCreate(TurfInfo[i][zMinX],TurfInfo[i][zMinY],TurfInfo[i][zMaxX],TurfInfo[i][zMaxY]);
-	}
-
-	// Player Class's
-	for(new i = 0; i <= sizeof(Peds)-1; i++)
-	{
-		AddPlayerClass(Peds[i][0],1958.3783,1343.1572,1100.3746,269.1425,-1,-1,-1,-1,-1,-1);
 	}
 
 	for(new h = 0; h < sizeof(HouseInfo); h++)
@@ -223,6 +219,8 @@ sampCallback OnPlayerRequestClass(playerid, classid) {
 }
 
 sampCallback OnPlayerConnect(playerid) {
+	new callSecs = gettime();
+
 	GetPlayerName(playerid, accName[playerid], sizeof(accName));
 	mysql_real_escape_string(accName[playerid], escapedName[playerid]);
 
@@ -239,155 +237,38 @@ sampCallback OnPlayerConnect(playerid) {
 	format(queryStr, sizeof(queryStr), "*** %s (id: %d) do³¹czy³ do serwera.", accName[playerid], playerid);
 	ABroadCast(COLOR_GREY, mainStr, 1);
 
-	VehicleStats[playerid] = TextDrawCreate(618.447998, 323.166717, "_");
-	TextDrawLetterSize(VehicleStats[playerid], 0.298667, 1.588333);
-	TextDrawAlignment(VehicleStats[playerid], 3);
-	TextDrawColor(VehicleStats[playerid], -1);
-	TextDrawSetShadow(VehicleStats[playerid], 0);
-	TextDrawSetOutline(VehicleStats[playerid], 1);
-	TextDrawBackgroundColor(VehicleStats[playerid], 255);
-	TextDrawFont(VehicleStats[playerid], 2);
-	TextDrawSetProportional(VehicleStats[playerid], 1);
+	VehicleStats[playerid][0] = TextDrawCreate(619.853393, 345.333526, "Ladowanie...");
+	TextDrawLetterSize(VehicleStats[playerid][0], 0.299604, 1.494998);
+	TextDrawAlignment(VehicleStats[playerid][0], 3);
+	TextDrawColor(VehicleStats[playerid][0], -1);
+	TextDrawSetShadow(VehicleStats[playerid][0], 0);
+	TextDrawSetOutline(VehicleStats[playerid][0], 1);
+	TextDrawBackgroundColor(VehicleStats[playerid][0], 255);
+	TextDrawFont(VehicleStats[playerid][0], 2);
+	TextDrawSetProportional(VehicleStats[playerid][0], 1);
+
+	VehicleStats[playerid][1] = TextDrawCreate(619.853454, 330.166778, "Ladowanie...");
+	TextDrawLetterSize(VehicleStats[playerid][1], 0.299604, 1.494998);
+	TextDrawAlignment(VehicleStats[playerid][1], 3);
+	TextDrawColor(VehicleStats[playerid][1], -1);
+	TextDrawSetShadow(VehicleStats[playerid][1], 0);
+	TextDrawSetOutline(VehicleStats[playerid][1], 1);
+	TextDrawBackgroundColor(VehicleStats[playerid][1], 255);
+	TextDrawFont(VehicleStats[playerid][1], 2);
+	TextDrawSetProportional(VehicleStats[playerid][1], 1);
 
 	gActivePlayers[playerid]++;
 	numplayers++;
-	loadedIntro[playerid] = false;
-	createdChar[playerid] = false;
-	SelectChar[playerid] = 0; HidePM[playerid] = 0; PhoneOnline[playerid] = 0;
-	SelectCharID[playerid] = 0; SelectCharPlace[playerid] = 0; ChosenSkin[playerid] = 0;
-	GettingJob[playerid] = 0; GuardOffer[playerid] = 999; GuardPrice[playerid] = 0;
-    ApprovedLawyer[playerid] = 0; CallLawyer[playerid] = 0; WantLawyer[playerid] = 0;
-	KickPlayer[playerid] = 0; CurrentMoney[playerid] = 0; UsedFind[playerid] = 0;
-	CP[playerid] = 0; Robbed[playerid] = 0; SpawnChange[playerid] = 1;
-	CarOffer[playerid] = 999; CarPrice[playerid] = 0; CarID[playerid] = 0; CarCalls[playerid] = 0;
-	RobbedTime[playerid] = 0; MoneyMessage[playerid] = 0; Condom[playerid] = 0;
-	STDPlayer[playerid] = 0; SexOffer[playerid] = 999; SexPrice[playerid] = 0;
-	RepairOffer[playerid] = 999; RepairPrice[playerid] = 0; RepairCar[playerid] = 0;
-	TalkingLive[playerid] = 255; LiveOffer[playerid] = 999; TakingLesson[playerid] = 0;
-	RefillOffer[playerid] = 999; RefillPrice[playerid] = 0; MapIconsShown[playerid] = 0;
-	DrugOffer[playerid] = 999; PlayerCuffed[playerid] = 0; PlayerCuffedTime[playerid] = 0;
-	DrugPrice[playerid] = 0; OnCK[playerid] = 999; GettingCK[playerid] = 999;
-	DrugGram[playerid] = 0; ConnectedToPC[playerid] = 0; OrderReady[playerid] = 0;
-	JailPrice[playerid] = 0; GotHit[playerid] = 0;
-	WantedPoints[playerid] = 0; GoChase[playerid] = 999; GetChased[playerid] = 999; PlacedNews[playerid] = 0;
-	OnDuty[playerid] = 0; WantedLevel[playerid] = 0; TestFishes[playerid] = 0;
-	BoxWaitTime[playerid] = 0; SchoolSpawn[playerid] = 0; ChangePos2[playerid][1] = 0;
-	SafeTime[playerid] = 60; TransportDuty[playerid] = 0; PlayerTied[playerid] = 0;
-	BusCallTime[playerid] = 0; TaxiCallTime[playerid] = 0; MedicCallTime[playerid] = 0; MechanicCallTime[playerid] = 0;
-	FindTimePoints[playerid] = 0; FindTime[playerid] = 0; JobDuty[playerid] = 0;
-	Mobile[playerid] = 255; Music[playerid] = 0; BoxOffer[playerid] = 999; PlayerBoxing[playerid] = 0;
-	Spectate[playerid] = 255; PlayerDrunk[playerid] = 0; PlayerDrunkTime[playerid] = 0;
-	Unspec[playerid][sLocal] = 255; FishCount[playerid] = 0;
-	WritingPaper[playerid] = 0; WritingPaperNumber[playerid] = 999; WritingLine[playerid] = 0; BringingPaper[playerid] = 0; GotPaper[playerid] = 0;
-	PaperOffer[playerid] = 999; ConsumingMoney[playerid] = 0;
-    gLastCar[playerid] = 0; FirstSpawn[playerid] = 0;
-	gOoc[playerid] = 0; gNews[playerid] = 0; BigEar[playerid] = 0; gDice[playerid] = 0; gFam[playerid] = 0;
-	gSpeedo[playerid] = 0; gGas[playerid] = 0;
-	gPlayerLogged[playerid] = 0; gPlayerLogTries[playerid] = 4; gPlayerAccount[playerid] = 0;
-	gPlayerSpawned[playerid] = 0; PlayerKarting[playerid] = 0; PlayerInKart[playerid] = 0;
-	PlayerTazeTime[playerid] = 0; PlayerStoned[playerid] = 0;
-	StartTime[playerid] = 0; TicketOffer[playerid] = 999; TicketMoney[playerid] = 0;
-	MatsHolding[playerid] = 0; TutTime[playerid] = 0;
-	gPlayerMission[playerid] = 0; TaxiAccepted[playerid] = 999; BusAccepted[playerid] = 999;
-	PlayerInfo[playerid][pCash] = dollah; NoFuel[playerid] = 0;
-	HireCar[playerid] = 299; PlayersChannel[playerid] = 999;
-	TransportValue[playerid] = 0; TransportMoney[playerid] = 0; TransportTime[playerid] = 0; TransportCost[playerid] = 0; TransportDriver[playerid] = 999;
-	Locator[playerid] = 0; PlayerOnMission[playerid] = 0; MissionCheckpoint[playerid] = 0;
-	WatchingTV[playerid] = 0; PlayerPaintballing[playerid] = 0; PlayerPaintballKills[playerid] = 0;
-	Fishes[playerid][pLastFish] = 0; Fishes[playerid][pFishID] = 0;
-	ProposeOffer[playerid] = 999; MarryWitness[playerid] = 999; MarryWitnessOffer[playerid] = 999; MarriageCeremoney[playerid] = 0; ProposedTo[playerid] = 999; GotProposedBy[playerid] = 999; DivorceOffer[playerid] = 999;
-	GivePlayerMoney(playerid,PlayerInfo[playerid][pCash]);
-	PlayerInfo[playerid][pLevel] = 0;
-	PlayerInfo[playerid][pAdmin] = 0;
-	PlayerInfo[playerid][pDonateRank] = 0;
-	PlayerInfo[playerid][gPupgrade] = 0;
-	PlayerInfo[playerid][pConnectTime] = 0;
-	PlayerInfo[playerid][pReg] = 0;
-	PlayerInfo[playerid][pSex] = 0;
-	PlayerInfo[playerid][pAge] = 0;
-	PlayerInfo[playerid][pOrigin] = 0;
-	PlayerInfo[playerid][pExp] = 0;
-	PlayerInfo[playerid][pAccount] = 0;
-	PlayerInfo[playerid][pCrimes] = 0;
-	PlayerInfo[playerid][pDeaths] = 0;
-	PlayerInfo[playerid][pArrested] = 0;
-	PlayerInfo[playerid][pWantedDeaths] = 0;
-	PlayerInfo[playerid][pPhoneBook] = 0;
-	PlayerInfo[playerid][pLottoNr] = 0;
-	PlayerInfo[playerid][pFishes] = 0;
-	PlayerInfo[playerid][pBiggestFish] = 0;
-	PlayerInfo[playerid][pJob] = 0;
-	PlayerInfo[playerid][pPayCheck] = 0;
-	PlayerInfo[playerid][pHeadValue] = 0;
-	PlayerInfo[playerid][pJailed] = 0;
-	PlayerInfo[playerid][pJailTime] = 0;
-	PlayerInfo[playerid][pMats] = 0;
-	PlayerInfo[playerid][pDrugs] = 0;
-	PlayerInfo[playerid][pLeader] = 0;
-	PlayerInfo[playerid][pMember] = 0;
-	PlayerInfo[playerid][pFMember] = 255;
-	PlayerInfo[playerid][pRank] = 0;
-	PlayerInfo[playerid][pChar] = 0;
-	PlayerInfo[playerid][pContractTime] = 0;
-	PlayerInfo[playerid][pDetSkill] = 0;
-	PlayerInfo[playerid][pSexSkill] = 0;
-	PlayerInfo[playerid][pBoxSkill] = 0;
-	PlayerInfo[playerid][pLawSkill] = 0;
-	PlayerInfo[playerid][pMechSkill] = 0;
-	PlayerInfo[playerid][pJackSkill] = 0;
-	PlayerInfo[playerid][pCarSkill] = 0;
-	PlayerInfo[playerid][pNewsSkill] = 0;
-	PlayerInfo[playerid][pDrugsSkill] = 0;
-	PlayerInfo[playerid][pCookSkill] = 0;
-	PlayerInfo[playerid][pFishSkill] = 0;
-	PlayerInfo[playerid][pSHealth] = 0.0;
-	PlayerInfo[playerid][pHealth] = 100.0;
-	PlayerInfo[playerid][pPos_x] = DEFAULT_POS_X;
-	PlayerInfo[playerid][pPos_y] = DEFAULT_POS_Y;
-	PlayerInfo[playerid][pPos_z] = DEFAULT_POS_Z;
-	PlayerInfo[playerid][pInt] = 0;
-	PlayerInfo[playerid][pLocal] = 255;
-	PlayerInfo[playerid][pTeam] = 3;
-	PlayerInfo[playerid][pModel] = 264;
-	new randphone = 1000 + random(8999);//minimum 1000  max 9999 //giving one at the start
-	PlayerInfo[playerid][pPnumber] = randphone;
-	PlayerInfo[playerid][pPhousekey] = 255;
-	PlayerInfo[playerid][pPbiskey] = 255;
-	PlayerInfo[playerid][pCarLic] = 0;
-	PlayerInfo[playerid][pFlyLic] = 0;
-	PlayerInfo[playerid][pBoatLic] = 0;
-	PlayerInfo[playerid][pFishLic] = 0;
-	PlayerInfo[playerid][pGunLic] = 0;
-	PlayerInfo[playerid][pGun1] = 0;
-	PlayerInfo[playerid][pGun2] = 0;
-	PlayerInfo[playerid][pGun3] = 0;
-	PlayerInfo[playerid][pGun4] = 0;
-	PlayerInfo[playerid][pAmmo1] = 0;
-	PlayerInfo[playerid][pAmmo2] = 0;
-	PlayerInfo[playerid][pAmmo3] = 0;
-	PlayerInfo[playerid][pAmmo4] = 0;
-	PlayerInfo[playerid][pCarTime] = 0;
-	PlayerInfo[playerid][pPayDay] = 0;
-	PlayerInfo[playerid][pPayDayHad] = 0;
-	PlayerInfo[playerid][pCDPlayer] = 0;
-	PlayerInfo[playerid][pWins] = 0;
-	PlayerInfo[playerid][pLoses] = 0;
-	PlayerInfo[playerid][pAlcoholPerk] = 0;
-	PlayerInfo[playerid][pDrugPerk] = 0;
-	PlayerInfo[playerid][pMiserPerk] = 0;
-	PlayerInfo[playerid][pPainPerk] = 0;
-	PlayerInfo[playerid][pTraderPerk] = 0;
-	PlayerInfo[playerid][pTut] = 0;
-	PlayerInfo[playerid][pMissionNr] = 0;
-	PlayerInfo[playerid][pWarns] = 0;
-	PlayerInfo[playerid][pFuel] = 0;
-	PlayerInfo[playerid][pAdjustable] = 0;
+
+	ClearPlayerData(playerid);
 	ClearCrime(playerid);
 	ClearFishes(playerid);
 	ClearCooking(playerid);
 	ClearGroceries(playerid);
 	ClearMarriage(playerid);
 	SetPlayerColor(playerid, COLOR_GRAD2);
+
+	printf("[CALLBACK] OnPlayerConnect -> ID: %d (%0.1d sec)", playerid, gettime() - callSecs);
 	return 1;
 }
 
@@ -418,130 +299,105 @@ sampCallback OnPlayerDisconnect(playerid, reason) {
 		}
 	}
 
-	for(new i = 0; i < MAX_PLAYERS; i++)
-	{
-	    if(IsPlayerConnected(i))
-	    {
-	        if(TaxiAccepted[i] < 999)
-	        {
-		        if(TaxiAccepted[i] == playerid)
-		        {
-		            TaxiAccepted[i] = 999;
-		            GameTextForPlayer(i, "~w~Taxi Caller~n~~r~Left the game", 5000, 1);
-		            TaxiCallTime[i] = 0;
-		            DisablePlayerCheckpoint(i);
-		        }
-	        }
-	        else if(BusAccepted[i] < 999)
-	        {
-		        if(BusAccepted[i] == playerid)
-		        {
-		            BusAccepted[i] = 999;
-		            GameTextForPlayer(i, "~w~Bus Caller~n~~r~Left the game", 5000, 1);
-		            BusCallTime[i] = 0;
-		            DisablePlayerCheckpoint(i);
-		        }
-	        }
-	    }
-	}
-	if(GettingCK[playerid] < 999)
-	{
-	    if(IsPlayerConnected(GettingCK[playerid]))
-	    {
-	        SendClientMessage(GettingCK[playerid], COLOR_YELLOW, "Your Character Kill has left the server, try again later.");
-	        OnCK[GettingCK[playerid]] = 999;
-	    }
-	}
-	if(TransportCost[playerid] > 0 && TransportDriver[playerid] < 999)
-	{
-	    if(IsPlayerConnected(TransportDriver[playerid]))
-		{
-		    new string[64];
-		    TransportMoney[TransportDriver[playerid]] += TransportCost[playerid];
-		    TransportTime[TransportDriver[playerid]] = 0;
-		    TransportCost[TransportDriver[playerid]] = 0;
-		    format(string, sizeof(string), "~w~Passenger left~n~~g~Earned $%d",TransportCost[playerid]);
-		    GameTextForPlayer(TransportDriver[playerid], string, 5000, 1);
-		}
-	}
-	if(GotHit[playerid] > 0)
-	{
-	    if(GetChased[playerid] < 999)
-	    {
-	        if(IsPlayerConnected(GetChased[playerid]))
-	        {
-	        	SendClientMessage(GetChased[playerid], COLOR_YELLOW, "Your Hit has left the server.");
-	            GoChase[GetChased[playerid]] = 999;
+	foreach(new i : Player) {
+	    if(TaxiAccepted[i] < 999) {
+			if(TaxiAccepted[i] == playerid) {
+				TaxiAccepted[i] = 999;
+				GameTextForPlayer(i, "~w~Taxi Caller~n~~r~Left the game", 5000, 1);
+				TaxiCallTime[i] = 0;
+				DisablePlayerCheckpoint(i);
 			}
+	    } else if(BusAccepted[i] < 999) {
+			if(BusAccepted[i] == playerid) {
+				BusAccepted[i] = 999;
+				GameTextForPlayer(i, "~w~Bus Caller~n~~r~Left the game", 5000, 1);
+				BusCallTime[i] = 0;
+				DisablePlayerCheckpoint(i);
+		    }
 	    }
 	}
-	if(PlayerPaintballing[playerid] != 0)
-	{
+
+	if(GettingCK[playerid] < 999) {
+	    SendClientMessage(GettingCK[playerid], COLOR_YELLOW, "Your Character Kill has left the server, try again later.");
+	    OnCK[GettingCK[playerid]] = 999;
+	}
+
+	if(TransportCost[playerid] > 0 && TransportDriver[playerid] < 999) {
+		new string[64];
+
+		TransportMoney[TransportDriver[playerid]] += TransportCost[playerid];
+		TransportTime[TransportDriver[playerid]] = 0;
+		TransportCost[TransportDriver[playerid]] = 0;
+
+		format(string, sizeof(string), "~w~Passenger left~n~~g~Earned $%d",TransportCost[playerid]);
+		GameTextForPlayer(TransportDriver[playerid], string, 5000, 1);
+	}
+
+	if(GotHit[playerid] > 0) {
+	    if(GetChased[playerid] < 999) {
+	        SendClientMessage(GetChased[playerid], COLOR_YELLOW, "Your Hit has left the server.");
+	        GoChase[GetChased[playerid]] = 999;
+	    }
+	}
+
+	if(PlayerPaintballing[playerid] != 0) {
 	    PaintballPlayers --;
 	}
-	if(PlayerKarting[playerid] > 0 && PlayerInKart[playerid] > 0)
-	{
+
+	if(PlayerKarting[playerid] > 0 && PlayerInKart[playerid] > 0) {
 	    KartingPlayers --;
 	}
-	if(HireCar[playerid] != 299)
-	{
+
+	if(HireCar[playerid] != 299) {
 		gLastDriver[HireCar[playerid]] = 300;
 		gCarLock[HireCar[playerid]] = 0;
 		UnLockCar(HireCar[playerid]);
 	}
-	if (gLastCar[playerid] > 0)
-	{
+
+	if(gLastCar[playerid] > 0) {
 		gLastDriver[gLastCar[playerid]] = 300;
-		if(PlayerInfo[playerid][pPhousekey] != gLastCar[playerid]-1)
-		{
+
+		if(PlayerInfo[playerid][pPhousekey] != gLastCar[playerid]-1) {
 			gCarLock[gLastCar[playerid]] = 0;
 			UnLockCar(gLastCar[playerid]);
 		}
 	}
-	if(PlayerBoxing[playerid] > 0)
-	{
-	    if(Boxer1 == playerid)
-	    {
-	        if(IsPlayerConnected(Boxer2))
-	        {
-	        	PlayerBoxing[Boxer2] = 0;
-	        	SetPlayerPos(Boxer2, 765.8433,3.2924,1000.7186);
-	        	SetPlayerInterior(Boxer2, 5);
-	        	GameTextForPlayer(Boxer2, "~r~Match interupted", 5000, 1);
-			}
+
+	if(PlayerBoxing[playerid] > 0) {
+	    if(Boxer1 == playerid) {
+	        PlayerBoxing[Boxer2] = 0;
+
+	        SetPlayerPos(Boxer2, 765.8433,3.2924,1000.7186);
+	        SetPlayerInterior(Boxer2, 5);
+	        GameTextForPlayer(Boxer2, "~r~Match interupted", 5000, 1);
+	    } else if(Boxer2 == playerid) {
+	        PlayerBoxing[Boxer1] = 0;
+
+	        SetPlayerPos(Boxer1, 765.8433,3.2924,1000.7186);
+	        SetPlayerInterior(Boxer1, 5);
+			GameTextForPlayer(Boxer1, "~r~Match interupted", 5000, 1);
 	    }
-	    else if(Boxer2 == playerid)
-	    {
-	        if(IsPlayerConnected(Boxer1))
-	        {
-	        	PlayerBoxing[Boxer1] = 0;
-	        	SetPlayerPos(Boxer1, 765.8433,3.2924,1000.7186);
-	        	SetPlayerInterior(Boxer1, 5);
-	        	GameTextForPlayer(Boxer1, "~r~Match interupted", 5000, 1);
-			}
-	    }
+
 	    InRing = 0;
      	RoundStarted = 0;
 		Boxer1 = 255;
 		Boxer2 = 255;
 		TBoxer = 255;
 	}
-    if(TransportDuty[playerid] == 1)
-	{
+
+    if(TransportDuty[playerid] == 1) {
 		TaxiDrivers -= 1;
-	}
-    else if(TransportDuty[playerid] == 2)
-	{
+	} else if(TransportDuty[playerid] == 2) {
 		BusDrivers -= 1;
 	}
-	if(PlayerInfo[playerid][pJob] == 11)
-	{
+
+	if(PlayerInfo[playerid][pJob] == 11) {
 	    if(JobDuty[playerid] == 1) { Medics -= 1; }
-	}
-	else if(PlayerInfo[playerid][pJob] == 7)
-	{
+	} else if(PlayerInfo[playerid][pJob] == 7) {
 	    if(JobDuty[playerid] == 1) { Mechanics -= 1; }
 	}
+
+	ClearPlayerData(playerid);
 	return 1;
 }
 
@@ -987,9 +843,14 @@ sampCallback OnPlayerDeath(playerid, killerid, reason)
 }
 
 sampCallback OnVehicleSpawn(vehicleid) {
-	SetVehicleNumberPlate(vehicleid, VehicleInfo[vehicleid][vPlate]);
-	SetVehicleHealth(vehicleid, VehicleInfo[vehicleid][vEngineHp]);
+	if(!strcmp(VehicleInfo[vehicleid][vPlate], "Brak", true)) {
+		SetVehicleNumberPlate(vehicleid, " ");
+	} else {
+		SetVehicleNumberPlate(vehicleid, VehicleInfo[vehicleid][vPlate]);
+	}
+
 	SetVehicleToRespawn(vehicleid);
+	SetVehicleHealth(vehicleid, VehicleInfo[vehicleid][vEngineHp]);
 
 	VehicleInfo[vehicleid][vSpawned] = true;
 	return 1;
@@ -999,11 +860,30 @@ sampCallback OnVehicleStreamIn(vehicleid, forplayerid) {
 	if(VehicleInfo[vehicleid][vSpawned]) {
 		SetVehicleParamsForPlayer(vehicleid, forplayerid, false, VehicleInfo[vehicleid][vLocked]);
 	}
+
+	if(!strcmp(VehicleInfo[vehicleid][vPlate], "Brak", true)) {
+		SetVehicleNumberPlate(vehicleid, " ");
+	} else {
+		SetVehicleNumberPlate(vehicleid, VehicleInfo[vehicleid][vPlate]);
+	}
+
+	SetVehicleHealth(vehicleid, VehicleInfo[vehicleid][vEngineHp]);
 	return 1;
 }
 
-sampCallback OnVehicleDeath(vehicleid, killerid)
-{
+sampCallback OnVehicleDeath(vehicleid, killerid) {
+	return 1;
+}
+
+sampCallback OnVehicleDamageStatusUpdate(vehicleid, playerid) {
+	if(VehicleInfo[vehicleid][vSpawned]) {
+		SaveVehicleData(vehicleid, VEHICLE_SAVE_ENGINE);
+
+		GetVehicleDamageStatus(vehicleid, VehicleInfo[vehicleid][vPanels], VehicleInfo[vehicleid][vDoors], VehicleInfo[vehicleid][vLights], VehicleInfo[vehicleid][vTires]);
+		UpdateVehicleDamageStatus(vehicleid, VehicleInfo[vehicleid][vPanels], VehicleInfo[vehicleid][vDoors], VehicleInfo[vehicleid][vLights], VehicleInfo[vehicleid][vTires]);
+
+		SaveVehicleData(vehicleid, VEHICLE_SAVE_VISUAL);
+	}
 	return 1;
 }
 
@@ -2389,7 +2269,12 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		}
 
 		if(gLastCar[playerid] != 0) {
-			TextDrawHideForPlayer(playerid, VehicleStats[playerid]);
+			if(VehicleInfo[gLastCar[playerid]][vNitro] == -1) {
+				TextDrawHideForPlayer(playerid, VehicleStats[playerid][0]);
+			} else {
+				TextDrawHideForPlayer(playerid, VehicleStats[playerid][1]);
+			}
+
 			SaveVehicleData(gLastCar[playerid], VEHICLE_SAVE_POS | VEHICLE_SAVE_ENGINE | VEHICLE_SAVE_MILEAGE);
 
 			VehicleInfo[gLastCar[playerid]][vDriverID] = INVALID_PLAYER_ID;
@@ -2508,10 +2393,20 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 			    RemovePlayerFromVehicle(playerid); }
 			}
 		}
+		else if(IsABike(newcar))
+		{
+			if(PlayerInfo[playerid][pBikeLic] < 1) {
+			    if(TakingLesson[playerid] == 1) { }
+			    else {
+			    SendClientMessage(playerid, COLOR_GREY, "Nie umiesz jeŸdziæ motorem.");
+			    RemovePlayerFromVehicle(playerid); }
+			}
+		}
 		else
 		{
 			if(PlayerInfo[playerid][pCarLic] < 1)
 			{
+				if(GetVehicleModel(newcar) != 572) {
 			    if(PlayerDrunk[playerid] >= 5)
 				{
 				    WantedPoints[playerid] += 1;
@@ -2521,6 +2416,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 				else {
 				SendClientMessage(playerid, COLOR_GREY, "   You don't know how to Drive yet, so you left the Car !");
                 RemovePlayerFromVehicle(playerid); }
+				}
 			}
 			else if(PlayerDrunk[playerid] >= 5)
 			{
@@ -2740,7 +2636,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 }
 
 sampCallback OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
-	if(PRESSED(KEY_ACTION)) {
+	if(PRESSED(KEY_NO)) {
 		if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
 			new vehicleid = GetPlayerVehicleID(playerid);
 
@@ -2750,7 +2646,7 @@ sampCallback OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
 		}
 	}
 
-	if(PRESSED(KEY_FIRE)) {
+	if(PRESSED(KEY_YES)) {
 		if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
 			new vehicleid = GetPlayerVehicleID(playerid);
 
@@ -3038,10 +2934,10 @@ Callback LoadIntro(playerid) {
 	loadedIntro[playerid] = true;
 
 	for(new i = 0; i < 20; i++) {
-		SendClientMessage(playerid, COLOR_WHITE, " ");
+		SendClientMessage(playerid, COLOR_GREY, " ");
 	}
 
-	SendClientMessage(playerid, COLOR_YELLOW, "Witaj w Old School Role Play: Proszê czekaæ na za³adowanie mapy OSRP v1.0.");
+	SendClientMessage(playerid, COLOR_YELLOW, "Witaj w "SERVER_NAME": Proszê czekaæ na za³adowanie mapy "SERVER_SHORT_NAME" "SERVER_VERSION".");
 	TextDrawHideForPlayer(playerid, SplashScreen);
 
 	for(new i = 0; i < 4; i++) {
@@ -3064,7 +2960,7 @@ Callback LoadIntro(playerid) {
 				SendClientMessage(playerid, COLOR_YELLOW2, "Serwer: To konto nie jest jeszcze zarejestrowane, aby zagraæ musisz siê zarejestrowaæ.");
 
 				mainStr[0] = EOS;
-				strcat(mainStr, "{FFFFFF}Kompletny regulamin serwera {FFC801}Old School Role Play {FFFFFF}znajduje siê na naszej stronie internetowej www.osrp.pl.\n");
+				strcat(mainStr, "{FFFFFF}Kompletny regulamin serwera {FFC801}"SERVER_NAME" {FFFFFF}znajduje siê na naszej stronie internetowej "WEBSITE_URL".\n");
 				strcat(mainStr, "Prosimy o zapoznanie siê z nim, poniewa¿ jego nieznajomoœæ nie jest usprawiedliwieniem do ³amania go.\n");
 				strcat(mainStr, "Za nieprzestrzeganie regulaminu gro¿¹ kary.\n\n");
 				strcat(mainStr, "Klikaj¹c przycisk {BDCB92}Akceptuj {FFFFFF}zobowi¹zujesz siê do przestrzegania regulaminu, {FFC801}Odrzuæ {FFFFFF}wi¹¿e siê z opuszczeniem serwera.");

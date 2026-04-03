@@ -10,18 +10,20 @@
 stock InitVehicleData() {
 	printf("[POJAZD] Zaczynam ladowac pojazdy...");
 
-	new id = 1;
+	new id;
 	new colorStr[8], posStr[32], windowStr[8], componentStr[82];
 
 	queryStr[0] = EOS;
-	format(queryStr, sizeof(queryStr), "SELECT `ID`, `OwnerID`, `OwnerType`, `BizID`, `AccessID`, `RentID`, `ModelID`, `EngineType`, `Color`, `Pos`, `Fuel`, `Locked`, `Engine`, `EngineHp`, `Spawned`, `LightsOn`, `Window`, `Accessories`, `Panels`, `Doors`, `Lights`, `Tires`, `Vw`, `Int`, `Paintjob`, `Nitro`, `Components`, `Repair`, `Mileage`, `Block`, `Desc`, `Plate` FROM `Vehicles`");
+	format(queryStr, sizeof(queryStr), "SELECT `ID`, `OwnerID`, `OwnerType`, `BizID`, `AccessID`, `RentID`, `ModelID`, `EngineType`, `Color`, `Pos`, `Fuel`, `Locked`, `Engine`, `EngineHp`, `Spawned`, `LightsOn`, `Window`, `Accessories`, `Panels`, `Doors`, `Lights`, `Tires`, `Vw`, `Int`, `Paintjob`, `Nitro`, `Components`, `Repair`, `Mileage`, `Block`, `Plate`, `Desc` FROM `Vehicles`");
 	mysql_query(queryStr);
 
 	mysql_store_result();
 
 	if(mysql_result_stored()) {
 		while(mysql_fetch_row(queryStr, "|")) {
-			sscanf(queryStr, "p<|>iiiis[32]iiis[8]s[32]fiifiis[8]iiiiiiiiis[82]ffis[128]s[32]",
+			id++;
+
+			sscanf(queryStr, "p<|>iiiis[32]iiis[8]s[32]fiifiis[8]iiiiiiiifs[82]ffis[128]s[32]",
 				VehicleInfo[id][vID],
 				VehicleInfo[id][vOwnerID],
 				VehicleInfo[id][vOwnerType],
@@ -83,7 +85,7 @@ stock InitVehicleData() {
 
 			Iter_Add(VehItter, id);
 
-			printf("[POJAZD] ID: %d, OwnerID: %d, OwnerType: %d, BizID: %d, AccessID: %s, RentID: %d, ModelID: %d, EngineType: %d, colorStr: %s, posStr: %s, Fuel: %0.1f, Lock: %d, Engine: %d, EngineHp: %0.1f, Spawned: %d, LightsOn: %d, Window: %s, Accessories: %d, Panels: %d, Doors: %d, Lights: %d, Tires: %d, Vw: %d, Int: %d, Paintjob: %d, Nitro: %d, Components: %s, Repair: %0.1f, Mileage: %0.1f, Block: %d, Desc: %s, Plate: %s\n",
+			printf("[POJAZD] ID: %d, OwnerID: %d, OwnerType: %d, BizID: %d, AccessID: %s, RentID: %d, ModelID: %d, EngineType: %d, colorStr: %s, posStr: %s, Fuel: %0.1f, Lock: %d, Engine: %d, EngineHp: %0.1f, Spawned: %d, LightsOn: %d, Window: %s, Accessories: %d, Panels: %d, Doors: %d, Lights: %d, Tires: %d, Vw: %d, Int: %d, Paintjob: %d, Nitro: %0.1f, Components: %s, Repair: %0.1f, Mileage: %0.1f, Block: %d, Plate: %s, Desc: %s\n",
 				VehicleInfo[id][vID],
 				VehicleInfo[id][vOwnerID],
 				VehicleInfo[id][vOwnerType],
@@ -117,8 +119,6 @@ stock InitVehicleData() {
 				VehicleInfo[id][vPlate],
 				VehicleInfo[id][vDesc]
 			);
-
-			id++;
 		}
 	}
 
@@ -135,7 +135,10 @@ stock AddVehicle(ownerid, ownertype, modelid, enginetype, color1, color2, salon,
 	mysql_store_result();
 
 	if(mysql_result_stored()) {
-		id = mysql_fetch_int() + 1;
+		if(Iter_Count(VehItter) == mysql_fetch_int()) {
+			id = Iter_Count(VehItter) + 1;
+		}
+
 		mysql_free_result();
 	}
 
@@ -143,9 +146,9 @@ stock AddVehicle(ownerid, ownertype, modelid, enginetype, color1, color2, salon,
 		return 1;
 	}
 
-	if(id + 1 == MAX_VEHICLES) {
+	if(id == MAX_VEHICLES) {
 		printf("[POJAZD] Nie mozna juz stworzyc kolejnego pojazdu.");
-		printf("[POJAZD] Przekroczono max liczbe dozwolonych pojazdow (%d).", MAX_VEHICLES);
+		printf("[POJAZD] Przekroczono limit dozwolonych pojazdow w grze (%d).", MAX_VEHICLES);
 		return 1;
 	}
 
@@ -178,12 +181,12 @@ stock AddVehicle(ownerid, ownertype, modelid, enginetype, color1, color2, salon,
 	VehicleInfo[id][vVw] = 0;
 	VehicleInfo[id][vInt] = 0;
 	VehicleInfo[id][vPaintjob] = -1;
-	VehicleInfo[id][vNitro] = 0;
+	VehicleInfo[id][vNitro] = -1.0;
 	VehicleInfo[id][vRepair] = 0.0;
 	VehicleInfo[id][vMileage] = 0.0;
 	VehicleInfo[id][vBlock] = false;
-	format(VehicleInfo[id][vPlate], 32, " ");
-	format(VehicleInfo[id][vDesc], 128, " ");
+	format(VehicleInfo[id][vPlate], 32, "Brak");
+	format(VehicleInfo[id][vDesc], 128, "Brak");
 
 	if(salon) {
 		VehicleInfo[id][vSpawned] = true;
@@ -219,7 +222,7 @@ stock AddVehicle(ownerid, ownertype, modelid, enginetype, color1, color2, salon,
 
 	Iter_Add(VehItter, id);
 
-	printf("[POJAZD] Dodano nowy pojazd o ID: %d", id + 1);
+	printf("[POJAZD] Dodano nowy pojazd o ID: %d", id);
 	return 1;
 }
 
@@ -263,12 +266,12 @@ stock RemoveVehicle(vehicleid) {
 	VehicleInfo[vehicleid][vVw] = 0;
 	VehicleInfo[vehicleid][vInt] = 0;
 	VehicleInfo[vehicleid][vPaintjob] = -1;
-	VehicleInfo[vehicleid][vNitro] = 0;
+	VehicleInfo[vehicleid][vNitro] = -1.0;
 	VehicleInfo[vehicleid][vRepair] = 0.0;
 	VehicleInfo[vehicleid][vMileage] = 0.0;
 	VehicleInfo[vehicleid][vBlock] = false;
-	VehicleInfo[vehicleid][vPlate] = " ";
-	VehicleInfo[vehicleid][vDesc] = " ";
+	VehicleInfo[vehicleid][vPlate] = "Brak";
+	VehicleInfo[vehicleid][vDesc] = "Brak";
 
 	if(VehicleInfo[vehicleid][vDriverID] != INVALID_PLAYER_ID) {
 		VehicleInfo[vehicleid][vSpawned] = false;
@@ -287,7 +290,7 @@ stock RemoveVehicle(vehicleid) {
 
 	Iter_Remove(VehItter, vehicleid);
 
-	printf("[POJAZD] Usunieto pojazd o ID: %d", vehicleid + 1);
+	printf("[POJAZD] Usunieto pojazd o ID: %d", vehicleid);
 	return 1;
 }
 
@@ -308,7 +311,7 @@ stock SaveVehicleData(vehicleid, option) {
 		format(posStr, sizeof(posStr), "%f,%f,%f,%f", VehicleInfo[vehicleid][vPos][0], VehicleInfo[vehicleid][vPos][1], VehicleInfo[vehicleid][vPos][2], VehicleInfo[vehicleid][vPos][3]);
 		format(queryStr, sizeof(queryStr), "%s`Pos` = '%s'", queryStr, posStr);
 
-		if(strlen(queryStr) > 23) {
+		if(strlen(queryStr) > 22) {
 			strcat(queryStr, ", ");
 		}
 	}
@@ -317,7 +320,7 @@ stock SaveVehicleData(vehicleid, option) {
 		GetVehicleHealth(vehicleid, VehicleInfo[vehicleid][vEngineHp]);
 		format(queryStr, sizeof(queryStr), "%s`EngineType` = '%d', `Engine` = '%d', `EngineHp` = '%f'", queryStr, VehicleInfo[vehicleid][vEngineType], VehicleInfo[vehicleid][vEngine], VehicleInfo[vehicleid][vEngineHp]);
 
-		if(strlen(queryStr) > 23) {
+		if(strlen(queryStr) > 22) {
 			strcat(queryStr, ", ");
 		}
 	}
@@ -325,13 +328,21 @@ stock SaveVehicleData(vehicleid, option) {
 	if(option & VEHICLE_SAVE_LOCKED) {
 		format(queryStr, sizeof(queryStr), "%s`Locked` = '%d'", queryStr, VehicleInfo[vehicleid][vLocked]);
 
-		if(strlen(queryStr) > 23) {
+		if(strlen(queryStr) > 22) {
 			strcat(queryStr, ", ");
 		}
 	}
 
 	if(option & VEHICLE_SAVE_MILEAGE) {
 		format(queryStr, sizeof(queryStr), "%s`Fuel` = '%f', `Mileage` = '%f'", queryStr, VehicleInfo[vehicleid][vFuel], VehicleInfo[vehicleid][vMileage]);
+
+		if(strlen(queryStr) > 22) {
+			strcat(queryStr, ", ");
+		}
+	}
+
+	if(option & VEHICLE_SAVE_VISUAL) {
+		format(queryStr, sizeof(queryStr), "%s`Panels` = '%d', `Doors` = '%d', `Lights` = '%d', `Tires` = '%d'", queryStr, VehicleInfo[vehicleid][vPanels], VehicleInfo[vehicleid][vDoors], VehicleInfo[vehicleid][vLights], VehicleInfo[vehicleid][vTires]);
 	}
 
 	format(queryStr, sizeof(queryStr), "%s WHERE `ID` = '%d'", queryStr, VehicleInfo[vehicleid][vID]);
@@ -349,7 +360,12 @@ stock SpawnVehicle(vehicleid) {
 	}
 
 	CreateVehicle(VehicleInfo[vehicleid][vModelID], VehicleInfo[vehicleid][vPos][0], VehicleInfo[vehicleid][vPos][1], VehicleInfo[vehicleid][vPos][2], VehicleInfo[vehicleid][vPos][3], VehicleInfo[vehicleid][vColor][0], VehicleInfo[vehicleid][vColor][1], -1);
-	VehicleInfo[vehicleid][v3DDesc] = CreateDynamic3DTextLabel(VehicleInfo[vehicleid][vDesc], COLOR_WHITE, 0.0, 0.0, 0.1, 20.0, INVALID_PLAYER_ID, vehicleid, 0, 0, 0, -1, 20.0, -1, 0);
+
+	if(!strcmp(VehicleInfo[vehicleid][vDesc], "Brak", true)) {
+		VehicleInfo[vehicleid][v3DDesc] = CreateDynamic3DTextLabel(" ", COLOR_WHITE, 0.0, 0.0, 0.1, 20.0, INVALID_PLAYER_ID, vehicleid, 0, 0, 0, -1, 20.0, -1, 0);
+	} else {
+		VehicleInfo[vehicleid][v3DDesc] = CreateDynamic3DTextLabel(VehicleInfo[vehicleid][vDesc], COLOR_WHITE, 0.0, 0.0, 0.1, 20.0, INVALID_PLAYER_ID, vehicleid, 0, 0, 0, -1, 20.0, -1, 0);
+	}
 
 	if(IsABicycle(VehicleInfo[vehicleid][vModelID])) {
 		SetVehicleParamsEx(vehicleid, 1, 0, 0, 0, 0, 0, 0);
@@ -365,7 +381,7 @@ stock SpawnVehicle(vehicleid) {
 
 	UpdateVehicleDamageStatus(vehicleid, VehicleInfo[vehicleid][vPanels], VehicleInfo[vehicleid][vDoors], VehicleInfo[vehicleid][vLights], VehicleInfo[vehicleid][vTires]);
 
-	if(VehicleInfo[vehicleid][vNitro]) {
+	if(VehicleInfo[vehicleid][vNitro] != -1.0) {
 		AddVehicleComponent(vehicleid, 1010);
 	}
 	return 1;
@@ -444,6 +460,10 @@ Callback VehicleEngineStarting(vehicleid) {
 		VehAnim[driverid] = true;
 	}
 
+	if(VehicleInfo[vehicleid][vFuel] <= 0.0) {
+		return SendClientMessage(driverid, COLOR_YELLOW, "Nie mo¿esz odpaliæ silnika, poniewa¿ nie ma paliwa w tym pojeŸdzie.");
+	}
+
 	PlayerPlaySound(driverid, 1084, 0.0, 0.0, 0.0);
 
 	if(!VehicleInfo[vehicleid][vEngine]) {
@@ -476,11 +496,8 @@ Callback VehicleEngineOn(vehicleid) {
 
 	VehAnim[driverid] = false;
 
-	if(VehicleInfo[vehicleid][vFuel] <= 0.0) {
-		return 1;
-	}
-
 	if(VehicleInfo[vehicleid][vEngineHp] <= 300.0) {
+		SendClientMessage(driverid, COLOR_YELLOW, "Nie uda³o siê odpaliæ silnika.");
 		return SendClientMessage(driverid, COLOR_YELLOW, "Ten pojazd jest zepsuty, nie mo¿na go uruchomiæ. Aby go naprawiæ musisz wezwaæ mechanika.");
 	} else if((VehicleInfo[vehicleid][vEngineHp] > 500.0) || (VehicleInfo[vehicleid][vEngineHp] <= 300.0 && (rand == 1 || rand == 3))) {
 		new engine, lights, alarm, doors, bonnet, boot, objective;
@@ -496,7 +513,11 @@ Callback VehicleEngineOn(vehicleid) {
 }
 
 stock IsVehicleOwner(playerid, vehicleid) {
-	if(VehicleInfo[vehicleid][vOwnerType] == VEHICLE_OWNER_TYPE_PLAYER) {
+	if(VehicleInfo[vehicleid][vOwnerType] == VEHICLE_OWNER_TYPE_SERVER) {
+		if(VehicleInfo[vehicleid][vOwnerID] == VEHICLE_OWNER_SERVER) {
+			return 1;
+		}
+	} else if(VehicleInfo[vehicleid][vOwnerType] == VEHICLE_OWNER_TYPE_PLAYER) {
 		if(VehicleInfo[vehicleid][vOwnerID] == PlayerInfo[playerid][pID]) {
 			return 1;
 		}
@@ -556,7 +577,7 @@ stock GetClosestVehicle(playerid) {
 }
 
 stock GetVehicleOwnerName(vehicleid) {
-	new name[64];
+	new name[32];
 
 	if(VehicleInfo[vehicleid][vOwnerType] == VEHICLE_OWNER_TYPE_PLAYER) {
 		if(VehicleInfo[vehicleid][vOwnerID] != VEHICLE_OWNER_NONE && VehicleInfo[vehicleid][vOwnerID] != VEHICLE_OWNER_SERVER) {
@@ -575,6 +596,80 @@ stock GetVehicleOwnerName(vehicleid) {
 	return name;
 }
 
+stock GetVehicleEngineTypeName(vehicleid) {
+	new name[32];
+
+	switch(VehicleInfo[vehicleid][vEngineType]) {
+		case -1: {
+			name = "Brak";
+		}
+		case 0: {
+			name = "Benzyna";
+		}
+		case 1: {
+			name = "Olej napedowy";
+		}
+		case 2: {
+			name = "Bateria";
+		}
+		case 3: {
+			name = "Paliwo lotnicze";
+		}
+	}
+	return name;
+}
+
+stock GenerateNewNumberPlate() {
+	new plate[32], platewithoutformatcolor[9], number[6];
+	new one, two, three, four, five, six;
+	new bool:found = false;
+
+	format(plate, sizeof(plate), "{000000}");
+	format(platewithoutformatcolor, sizeof(platewithoutformatcolor), "LS ");
+
+	while(!found) {
+		one = random(0, 10);
+		two = random(0, 10);
+		three = random(0, 10);
+		four = random(0, 10);
+		five = random(0, 10);
+		six = random(0, 10);
+
+		format(number, sizeof(number), "%d%d%d%d%d%d", one, two, three, four, five, six);
+		strcat(platewithoutformatcolor, number);
+
+		queryStr[0] = EOS;
+		format(queryStr, sizeof(queryStr), "SELECT `ID` FROM `Vehicles` WHERE `Plate` = '%s' LIMIT 1", platewithoutformatcolor);
+		mysql_query(queryStr);
+
+		mysql_store_result();
+
+		if(mysql_result_stored()) {
+			if(mysql_num_rows() == 0) {
+				printf("[REJESTRACJA] Wygenerowana %s jest unikatowa.", platewithoutformatcolor);
+				found = true;
+			} else {	
+				printf("[REJESTRACJA] Wygenerowana %s nie jest unikatowa.", platewithoutformatcolor);
+			}
+
+			mysql_free_result();
+		}
+	}
+
+	strcat(plate, platewithoutformatcolor);
+	strcat(plate, "{000000}");
+	return platewithoutformatcolor;
+}
+
+stock RespawnVehicle(vehicleid) {
+	VehicleInfo[vehicleid][vSpawned] = false;
+	UnSpawnVehicle(vehicleid);
+
+	VehicleInfo[vehicleid][vSpawned] = true;
+	SpawnVehicle(vehicleid);
+	return 1;
+}
+
 stock IsVehicleInUse(vehicleid) {
 	foreach(new i : Player) {
 		if(IsPlayerInVehicle(i, vehicleid)) {
@@ -585,6 +680,13 @@ stock IsVehicleInUse(vehicleid) {
 }
 
 stock IsABicycle(carid) {
+	if(carid == 481 || carid == 509 || carid == 510) {
+		return 1;
+	}
+	return 0;
+}
+
+stock IsABike(carid) {
 	if(carid == 481 || carid == 509 || carid == 510) {
 		return 1;
 	}

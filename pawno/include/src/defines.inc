@@ -13,7 +13,9 @@
 #undef MAX_VEHICLES
 #define MAX_VEHICLES 100
 
+#define MAX_ITEMS 500
 #define MAX_PLAYER_CHARS 5
+#define MAX_PLAYER_VEHS 5
 #define MAX_TRASH_JOB_OBJECTS 24
 #define MAX_BUSH_JOB_OBJECTS 20
 
@@ -35,11 +37,11 @@
 
 #define SERVER_NAME "Old School Role Play"
 #define SERVER_SHORT_NAME "OSRP"
-#define SERVER_VERSION "1.0"
+#define SERVER_VERSION "v1.0"
 
 // Strona:
 #define WEBSITE_NAME ""
-#define WEBSITE_URL ""
+#define WEBSITE_URL "www.osrp.pl"
 
 #define PRESSED(%0) \
 	(((newkeys & (%0)) == (%0)) && ((oldkeys & (%0)) != (%0)))
@@ -110,6 +112,12 @@
 #define DIALOG_ACCOUNT_CHAR_ORIGIN 14
 #define DIALOG_ACCOUNT_CHAR_SUMMARY 15
 #define DIALOG_TUTORIAL 16
+#define DIALOG_SHOW_PLAYER_VEHICLES 20
+#define DIALOG_SHOW_ITEMS 30
+#define DIALOG_PLAYER_ITEMS 31
+#define DIALOG_SOMEONE_ITEMS 32
+#define DIALOG_TAKE_ITEMS 33
+#define DIALOG_ACTION_ITEM 34
 #define DIALOG_ADMIN_VEHICLE 100
 #define DIALOG_ADMIN_VEHICLE_COLOR 101
 #define DIALOG_ADMIN_VEHICLE_OWNER 102
@@ -150,6 +158,32 @@
 #define RefuelWait 5000
 #define CAR_AMOUNT 700 //Change to Your Vehicle Amount
 
+// Item:
+#define ITEM_OWNER_NONE 0
+#define ITEM_OWNER_PLAYER 1
+#define ITEM_OWNER_VEHICLE 2
+#define ITEM_OWNER_HOUSE 3
+
+#define ITEM_TYPE_NONE 0
+#define ITEM_TYPE_GUN 1
+#define ITEM_TYPE_FOOD 2
+#define ITEM_TYPE_STIMULANT 3
+#define ITEM_TYPE_ELECTRONIC 4
+#define ITEM_TYPE_ACCESSORY 5
+#define ITEM_TYPE_TOOL 6
+#define ITEM_TYPE_FISHING 7
+#define ITEM_TYPE_SEEDLING 8
+#define ITEM_TYPE_OTHER 9
+
+#define ITEM_SUB_TYPE_NONE 0
+#define ITEM_SUB_TYPE_GUN_AMMO 1
+#define ITEM_SUB_TYPE_GUN_WEAP 2
+#define ITEM_SUB_TYPE_FOOD_MEAL 3 
+#define ITEM_SUB_TYPE_FOOD_DRINK 4 
+#define ITEM_SUB_TYPE_STIMULANT_ALCO 5
+#define ITEM_SUB_TYPE_STIMULANT_SMOKE 6
+#define ITEM_SUB_TYPE_STIMULANT_DRUG 7
+
 // Vehicle:
 #define VEHICLE_OWNER_NONE -1
 #define VEHICLE_OWNER_SERVER 0
@@ -178,6 +212,7 @@
 #define VEHICLE_SAVE_ENGINE 2
 #define VEHICLE_SAVE_LOCKED 4
 #define VEHICLE_SAVE_MILEAGE 8
+#define VEHICLE_SAVE_VISUAL 16
 
 // Funcs:
 forward Float:GetDistanceBetweenPlayers(p1, p2);

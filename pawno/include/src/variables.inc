@@ -26,8 +26,11 @@ new bool:VehAnim[MAX_PLAYERS];
 new bool:pTrashZone[MAX_PLAYERS];
 new bool:pBushZone[MAX_PLAYERS];
 
+new pChosenItemID[MAX_PLAYERS];
+
 new AdminVehModelID;
 new AdminVehColor[2];
+new AdminVehEngine;
 new AdminVehOwner[2];
 
 new gTeam[MAX_PLAYERS];
@@ -342,6 +345,7 @@ new Groceries[MAX_PLAYERS][pGroceries];
 new Unspec[MAX_PLAYERS][pSpec];
 new News[hNews];
 new PlayerInfo[MAX_PLAYERS][pInfo];
+new ItemInfo[MAX_ITEMS][iInfo];
 new VehicleInfo[MAX_VEHICLES][vInfo];
 new HouseInfo[34][hInfo];
 new BizzInfo[5][bInfo];
@@ -451,38 +455,6 @@ new JoinPed[52][1] = {
 {150}//DRIVING/FLYING_SCHOOL
 };
 
-new Peds[217][1] = {
-{264},
-{288},//TEAM_ADMIN
-{286},{287},{228},{113},{120},{147},{294},{227},{61},{171},
-{247},//CIVILIANS DOWN HERE
-{248},{100},{256},{263},{262},{261},{260},{259},{258},{257},{256},{255},
-{253},{252},{251},{249},{246},{245},{244},{243},{242},{241},{240},{239},
-{238},{237},{236},{235},{234},{233},{232},{231},{230},{229},
-{226},{225},{173},{174},{175},{224},{223},{222},{221},{220},{219},{218},
-{217},{216},{215},{214},{213},{212},{211},{210},{209},
-{207},{206},{205},{204},{203},{202},{201},{200},{199},{198},{197},{196},
-{195},{194},{193},{192},{191},{190},{189},{185},{184},{183},
-{182},{181},{180},{179},{178},{176},{172},{170},{168},{167},{162},
-{161},{160},{159},{158},{157},{156},{155},{154},{153},{152},{151},
-{146},{145},{144},{143},{142},{141},{140},{139},{138},{137},{136},{135},
-{134},{133},{132},{131},{130},{129},{128},{254},{99},{97},{96},{95},{94},
-{92},{90},{89},{88},{87},{85},{84},{83},{82},{81},{80},{79},{78},{77},{76},
-{75},{73},{72},{69},{68},{67},{66},{64},{63},{62},{58},{57},{56},{55},
-{54},{53},{52},{51},{50},{49},{45},{44},{43},{41},{39},{38},{37},{36},{35},
-{34},{33},{32},{31},{30},{29},{28},{27},{26},{25},{24},{23},{22},{21},{20},
-{19},{18},{17},{16},{15},{14},{13},{12},{11},{10},{1},{2},
-{290},//ROSE
-{291},//PAUL
-{292},//CESAR
-{293},//OGLOC
-{187},
-{296},//JIZZY
-{297},//MADDOGG
-{298},//CAT
-{299}//ZERO
-};
-
 stock femaleSkinsId[] = {
 	9, 10, 11, 12, 13, 31, 38, 39, 40, 41, 53,
 	54, 55, 56, 63, 64, 65, 69, 75, 76, 77, 85, 87, 88, 89, 90, 91, 92, 93, 
@@ -590,7 +562,7 @@ new VehicleNames[][] = {
 	"Sanchez",
 	"Sparrow",
 	"Patriot",
-	"Quad",
+	"Quadbike",
 	"Coastguard",
 	"Dinghy",
 	"Hermes",
@@ -629,7 +601,7 @@ new VehicleNames[][] = {
 	"Elegant",
 	"Journey",
 	"Bike",
-	"MTB", //Rower górski
+	"MTB",
 	"Beagle",
 	"Cropdust",
 	"Stunt",
@@ -733,8 +705,9 @@ new VehicleNames[][] = {
 	"Utility Trailer"
 };
 
+new Iterator:ItemItter<MAX_ITEMS>;
 new Iterator:VehItter<MAX_VEHICLES>;
 
 new Text:SplashScreen;
 new Text:Intro[4];
-new Text:VehicleStats[MAX_PLAYERS];
+new Text:VehicleStats[MAX_PLAYERS][2];

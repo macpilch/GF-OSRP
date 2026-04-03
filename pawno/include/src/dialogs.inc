@@ -57,7 +57,7 @@ sampCallback OnDialogResponse(playerid, dialogid, response, listitem, inputtext[
 			mysql_query(queryStr);
 
 			gPlayerAccount[playerid] = 1;
-			SendClientMessage(playerid, COLOR_YELLOW, "Konto zosta³o zarejestrowane. Jeœli chcesz zwiekszyæ bezpieczeñstwo konta podepnij swój email na www.osrp.pl");
+			SendClientMessage(playerid, COLOR_YELLOW, "Konto zosta³o zarejestrowane. Jeœli chcesz zwiekszyæ bezpieczeñstwo konta podepnij swój email na "WEBSITE_URL"");
 
 			mainStr[0] = EOS;
 			strcat(mainStr, "{FFFFFF}Pomyœlnie zarejestrowa³eœ konto.\nMo¿esz teraz wpisaæ nazwe konta osoby, która poleci³a Ci ten serwer.\n");
@@ -458,6 +458,54 @@ sampCallback OnDialogResponse(playerid, dialogid, response, listitem, inputtext[
 			}
 
 			TutTime[playerid] = 1;
+		}
+		case DIALOG_SHOW_ITEMS: {
+			if(!response) {
+				return 1;
+			}
+
+			ShowPlayerItemToSomeOne(playerid, playerid, DIALOG_PLAYER_ITEMS);
+		}
+		case DIALOG_PLAYER_ITEMS: {
+			if(!response) {
+				return callcmd::p(playerid, "");
+			}
+
+			new name[64], tmp[32];
+
+			sscanf(inputtext, "s[64]s[32]", name, tmp);
+
+			foreach(new i : ItemItter) {
+				if(PlayerInfo[playerid][pID] == ItemInfo[i][iOwnerID]) {
+					if(!strcmp(ItemInfo[i][iName], name, false)) {
+						pChosenItemID[playerid] = i;
+						break;
+					}
+				}
+			}
+
+			osrp_ShowPlayerDialog(playerid, DIALOG_ACTION_ITEM, DIALOG_STYLE_LIST, "Co chcesz zrobiæ z tym przedmiotem?", "{FFFFFF}U¿yj\nOddaj\nOd³ó¿\nZniszcz", "Wybierz", "Cofnij");
+		}
+		case DIALOG_ACTION_ITEM: {
+			if(!response) {
+				pChosenItemID[playerid] = -1;
+				return ShowPlayerItemToSomeOne(playerid, playerid, DIALOG_PLAYER_ITEMS);
+			}
+
+			switch(listitem) {
+				case 0: {
+					UseItemForPlayer(playerid, pChosenItemID[playerid], GetItemTypeFromID(pChosenItemID[playerid]), GetItemSubTypeFromID(pChosenItemID[playerid]));
+				}
+				case 1: {
+					
+				}
+				case 2: {
+					
+				}
+				case 3: {
+					DestroyItem(pChosenItemID[playerid]);
+				}
+			}
 		}
 		case DIALOG_ADMIN_VEHICLE: {
 			if(!response) {
