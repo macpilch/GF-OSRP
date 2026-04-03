@@ -158,7 +158,7 @@ CMD:zegarek(playerid, params[]) {
 	GameTextForPlayer(playerid, mainStr, 5000, 1);
 
 	mainStr[0] = EOS;
-	format(mainStr, sizeof(mainStr), "* %s patrzy na swój zegarek.", PlayerInfo[playerid][pName]);
+	format(mainStr, sizeof(mainStr), "* %s patrzy na sw j zegarek.", PlayerInfo[playerid][pName]);
 	ProxDetector(30.0, playerid, mainStr, COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE);
 	return 1;
 }
@@ -167,7 +167,7 @@ alias:zegarek("czas")
 
 CMD:stats(playerid, params[]) {
 	if(!gPlayerLogged[playerid]) {
-		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jesteœ zalogowany.");
+		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jeste  zalogowany.");
 	}
 
 	ShowStats(playerid,playerid);
@@ -176,7 +176,7 @@ CMD:stats(playerid, params[]) {
 
 CMD:b(playerid, params[]) {
 	if(!gPlayerLogged[playerid]) {
-		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jesteœ zalogowany.");
+		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jeste  zalogowany.");
 	}
 
 	new result[64];
@@ -194,13 +194,13 @@ CMD:b(playerid, params[]) {
 
 CMD:krzyk(playerid, params[]) {
 	if(!gPlayerLogged[playerid]) {
-		return SendClientMessage(playerid, COLOR_GREY, "Nie jesteœ zalogowany.");
+		return SendClientMessage(playerid, COLOR_GREY, "Nie jeste  zalogowany.");
 	}
 
 	new result[64];
 
 	if(sscanf(params, "s[64]", result)) {
-		return SendClientMessage(playerid, COLOR_GRAD2, "Wpisz: (/s)krzyk [wiadomoœæ]");
+		return SendClientMessage(playerid, COLOR_GRAD2, "Wpisz: (/s)krzyk [wiadomo  ]");
 	}
 
 	format(mainStr, sizeof(mainStr), "%s krzyczy: %s!", PlayerInfo[playerid][pName], result);
@@ -213,7 +213,7 @@ alias:krzyk("s")
 
 CMD:me(playerid, params[]) {
 	if(!gPlayerLogged[playerid]) {
-		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jesteœ zalogowany.");
+		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jeste  zalogowany.");
 	}
 
 	new result[64];
@@ -234,7 +234,7 @@ alias:me("ja")
 
 CMD:do(playerid, params[]) {
 	if(!gPlayerLogged[playerid]) {
-		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jesteœ zalogowany.");
+		return SendClientMessage(playerid, COLOR_GRAD1, "Nie jeste  zalogowany.");
 	}
 
 	new result[64];
@@ -300,14 +300,14 @@ CMD:zamek(playerid, params[]) {
 			GameTextForPlayer(playerid, "~n~~n~~n~~w~Pojazd ~g~otwarty", 3000, 3);
 
 			mainStr[0] = EOS;
-			format(mainStr, sizeof(mainStr), "* %s przekrêca kluczyk i otwiera pojazd.", PlayerInfo[playerid][pName]);
+			format(mainStr, sizeof(mainStr), "* %s przekr ca kluczyk i otwiera pojazd.", PlayerInfo[playerid][pName]);
 			ProxDetector(30.0, playerid, mainStr, COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE);
 		} else {
 			VehicleInfo[vehicleid][vLocked] = true;
 			GameTextForPlayer(playerid, "~n~~n~~n~~w~Pojazd ~r~zamkniety", 3000, 3);
 
 			mainStr[0] = EOS;
-			format(mainStr, sizeof(mainStr), "* %s przekrêca kluczyk i zamyka pojazd.", PlayerInfo[playerid][pName]);
+			format(mainStr, sizeof(mainStr), "* %s przekr ca kluczyk i zamyka pojazd.", PlayerInfo[playerid][pName]);
 			ProxDetector(30.0, playerid, mainStr, COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE);
 		}
 
@@ -317,14 +317,14 @@ CMD:zamek(playerid, params[]) {
 			SetVehicleParamsForPlayer(vehicleid, i, 0, VehicleInfo[vehicleid][vLocked]);
 		}
 	} else {
-		SendClientMessage(playerid, COLOR_GRAD1, "Nie ma przed tob¹ ¿adnego pojazdu.");
+		SendClientMessage(playerid, COLOR_GRAD1, "Nie ma przed tob   adnego pojazdu.");
 	}
 	return 1;
 }
 
 CMD:dodajpojazd(playerid, params[]) {
 	if(PlayerInfo[playerid][pAdmin] < 1) {
-		return SendClientMessage(playerid, COLOR_GRAD1, "Nie posiadasz uprawnieñ do u¿ywania tej komendy.");
+		return SendClientMessage(playerid, COLOR_GRAD1, "Nie posiadasz uprawnie  do u ywania tej komendy.");
 	}
 
 	new str[3000];
@@ -339,12 +339,25 @@ CMD:dodajpojazd(playerid, params[]) {
 	return 1;
 }
 
+CMD:dajtablice(playerid, params[]) {
+	new giveplayerid, vehicleid;
+	if(sscanf(params, "ii", giveplayerid, vehicleid)) {
+		return SendClientMessage(playerid, COLOR_GRAD1, "Nie posiadasz uprawnie  do u ywania tej komendy.");
+	}
+
+	format(VehicleInfo[vehicleid][vPlate], 32, "%s", GenerateNewNumberPlate());
+	
+	RespawnVehicle(vehicleid);
+	
+	return 1;
+}
+
 /*
 CMD:pay(playerid, params[]) {
 	new giveplayerid, moneys;
 
 	if(sscanf(params, "ii", giveplayerid, moneys)) {
-		return SendClientMessage(playerid, COLOR_GRAD1, "U¿yj: /pay [playerid/PartOfName] [ilosc]");
+		return SendClientMessage(playerid, COLOR_GRAD1, "U yj: /pay [playerid/PartOfName] [ilosc]");
 	}
 
 	if(moneys > 1000 && PlayerInfo[playerid][pLevel] < 3) {
@@ -1227,10 +1240,10 @@ CMD:togphone(playerid, params[]) {
 	if(PlayerInfo[playerid][pDonateRank] > 0 || PlayerInfo[playerid][pAdmin] > 1) {
 		if(!PhoneOnline[playerid]) {
 			PhoneOnline[playerid] = 1;
-			SendClientMessage(playerid, COLOR_GRAD2, "   Wy³aczono telefon !");
+			SendClientMessage(playerid, COLOR_GRAD2, "   Wy aczono telefon !");
 		} else if(PhoneOnline[playerid]) {
 			PhoneOnline[playerid] = 0;
-			SendClientMessage(playerid, COLOR_GRAD2, "   W³¹czono telefon !");
+			SendClientMessage(playerid, COLOR_GRAD2, "   W  czono telefon !");
 		}
 	} else {
 		SendClientMessage(playerid, COLOR_GREY, "   Not an Admin / Premium Account User !");
@@ -5616,7 +5629,7 @@ CMD:kick(playerid, params[]) {
 			format(mainStr, sizeof(mainStr), "AdmCmd: %s was kicked by %s, reason: %s (%d-%d-%d)", PlayerInfo[giveplayerid][pName], PlayerInfo[playerid][pName], (result),month,day,year);
 			KickLog(mainStr);
 			Kick(giveplayerid);
-			format(mainStr, sizeof(mainStr), "Serwer: %s zosta³ wyrzucony z serwera przez %s. Powód: %s", PlayerInfo[giveplayerid][pName], PlayerInfo[playerid][pName], (result));
+			format(mainStr, sizeof(mainStr), "Serwer: %s zosta  wyrzucony z serwera przez %s. Pow d: %s", PlayerInfo[giveplayerid][pName], PlayerInfo[playerid][pName], (result));
 			SendClientMessageToAll(COLOR_LIGHTRED, mainStr);
 			return 1;
 		}
@@ -5695,7 +5708,7 @@ CMD:warn(playerid, params[]) {
 				getdate(year, month, day);
 				format(mainStr, sizeof(mainStr), "AdmCmd: %s was banned by %s, reason: %s (%d-%d-%d)", PlayerInfo[giveplayerid][pName], PlayerInfo[playerid][pName], (result),month,day,year);
 				BanLog(mainStr);
-				format(mainStr, sizeof(mainStr), "Serwer: %s dosta³ warna (3/3) i zosta³ zbanowany przez %s. Powód: %s", PlayerInfo[giveplayerid][pName], PlayerInfo[playerid][pName], (result));
+				format(mainStr, sizeof(mainStr), "Serwer: %s dosta  warna (3/3) i zosta  zbanowany przez %s. Pow d: %s", PlayerInfo[giveplayerid][pName], PlayerInfo[playerid][pName], (result));
 				SendClientMessageToAll(COLOR_LIGHTRED, mainStr);
 				PlayerInfo[giveplayerid][pAdmin] = PlayerInfo[giveplayerid][pLevel];
 				PlayerInfo[giveplayerid][pLevel] = -999;
@@ -5763,7 +5776,7 @@ CMD:ban(playerid, params[]) {
 			getdate(year, month, day);
 			format(mainStr, sizeof(mainStr), "AdmCmd: %s was banned by %s, reason: %s (%d-%d-%d)", PlayerInfo[giveplayerid][pName], PlayerInfo[playerid][pName], (result),month,day,year);
 			BanLog(mainStr);
-			format(mainStr, sizeof(mainStr), "Serwer: %s zosta³ zbanowany przez %s. Powód: %s", PlayerInfo[giveplayerid][pName], PlayerInfo[playerid][pName], (result));
+			format(mainStr, sizeof(mainStr), "Serwer: %s zosta  zbanowany przez %s. Pow d: %s", PlayerInfo[giveplayerid][pName], PlayerInfo[playerid][pName], (result));
 			SendClientMessageToAll(COLOR_LIGHTRED, mainStr);
 			PlayerInfo[giveplayerid][pAdmin] = PlayerInfo[giveplayerid][pLevel];
 			PlayerInfo[giveplayerid][pLevel] = -999;
@@ -8569,16 +8582,16 @@ CMD:music(playerid, params[]) {
 CMD:wezwij(playerid, params[]) {
 	new x_nr[256];
 	if(!strlen(x_nr)) {
-		SendClientMessage(playerid, COLOR_WHITE, "Nazwy serwisów:");
+		SendClientMessage(playerid, COLOR_WHITE, "Nazwy serwis w:");
 		SendClientMessage(playerid, COLOR_GREY, "Wpisz: /wezwij [nazwa]");
-		SendClientMessage(playerid, COLOR_GREY, "Dostêpne nazwy: {FFFFFF}Taxi, Bus, Medyk, Mechanik");
+		SendClientMessage(playerid, COLOR_GREY, "Dost pne nazwy: {FFFFFF}Taxi, Bus, Medyk, Mechanik");
 		return 1;
 	}
 	if(strcmp(x_nr,"taxi",true) == 0)
 	{
 		if(TaxiDrivers < 1)
 		{
-			SendClientMessage(playerid, COLOR_GREY, "Obecnie nie ma ¿adnych taksówkarzy na s³u¿bie. Spróbuj póŸniej.");
+			SendClientMessage(playerid, COLOR_GREY, "Obecnie nie ma  adnych taks wkarzy na s u bie. Spr buj p niej.");
 			return 1;
 		}
 		if(TransportDuty[playerid] > 0)
@@ -8617,7 +8630,7 @@ CMD:wezwij(playerid, params[]) {
 			SendClientMessage(playerid, COLOR_GREY, "   There are no Medics On Duty at the moment, try again later !");
 			return 1;
 		}
-		format(mainStr, sizeof(mainStr), "* %s potrzebuje medyka. (wpisz /akceptuj medyk, aby zaakceptowaæ wezwanie)", PlayerInfo[playerid][pName]);
+		format(mainStr, sizeof(mainStr), "* %s potrzebuje medyka. (wpisz /akceptuj medyk, aby zaakceptowa  wezwanie)", PlayerInfo[playerid][pName]);
 		SendRadioMessage(4, TEAM_AZTECAS_COLOR, mainStr);
 		SendClientMessage(playerid, COLOR_LIGHTBLUE, "* You have called for a Medic, wait for a reply.");
 		MedicCall = playerid;
@@ -11800,7 +11813,7 @@ CMD:accept(playerid, params[]) {
 			{
 				if(IsPlayerConnected(MedicCall))
 				{
-					format(mainStr, sizeof(mainStr), "* Akceptowa³eœ wezwanie medyka %s. JedŸ do czerwonego ko³a (masz 30 sekund).", PlayerInfo[MedicCall][pName]);
+					format(mainStr, sizeof(mainStr), "* Akceptowa e  wezwanie medyka %s. Jed  do czerwonego ko a (masz 30 sekund).", PlayerInfo[MedicCall][pName]);
 					SendClientMessage(playerid, COLOR_LIGHTBLUE, mainStr);
 					SendClientMessage(playerid, COLOR_LIGHTBLUE, "* Po 30 sekundach czerwony marker zniknie.");
 					format(mainStr, sizeof(mainStr), "* Medic %s has accepted your Medic Call please wait at your current Position.",PlayerInfo[playerid][pName]);

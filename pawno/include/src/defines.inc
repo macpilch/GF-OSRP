@@ -30,10 +30,10 @@
 	forward %0(%1); public %0(%1)
 
 // MySQL
-#define MYSQL_HOST "145.239.236.240"
-#define MYSQL_USER "srv82617"
-#define MYSQL_PASSWORD "ZDIfB3h0gxelO5hM"
-#define MYSQL_DB "srv82617"
+#define MYSQL_HOST "localhost"
+#define MYSQL_USER "root"
+#define MYSQL_PASSWORD "root"
+#define MYSQL_DB "osrpv1.0"
 
 #define SERVER_NAME "Old School Role Play"
 #define SERVER_SHORT_NAME "OSRP"
