@@ -26,6 +26,8 @@
 #include "src\variables"
 #include "src\systems\atm"
 #include "src\systems\casual_jobs"
+#include "src\systems\scrap"
+#include "src\systems\orgs"
 #include "src\systems\plant"
 #include "src\systems\item"
 #include "src\systems\vehicle"
