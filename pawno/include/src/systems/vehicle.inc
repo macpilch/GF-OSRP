@@ -121,8 +121,9 @@ stock InitVehicleData() {
 				VehicleInfo[id][vRepair],
 				VehicleInfo[id][vMileage],
 				VehicleInfo[id][vBlock],
-				VehicleInfo[id][vDesc],
-				VehicleInfo[id][vPlate]
+				VehicleInfo[id][vPlate],
+				VehicleInfo[id][vDesc]
+				
 				
 			);
 		}
@@ -732,7 +733,7 @@ stock IsABike(carid) {
 	return 0;
 }
 
-stock GenerateNewNumberPlate()
+stock GenerateNewNumberPlate(vehicleid)
 {
 	new plate[32], platewithoutformatcolor[9], number[6];
 	new one, two, three, four, five, six;
@@ -758,7 +759,7 @@ stock GenerateNewNumberPlate()
 		mysql_store_result();
 		if(mysql_num_rows() == 0) {
 			printf("[PLATE] generated %s is unique", platewithoutformatcolor);
-			found = true;
+			found = true; // brak wystepowania w bazie
 		}
 		else {	
 			printf("[PLATE] generated %s is not unique", platewithoutformatcolor);
@@ -767,10 +768,11 @@ stock GenerateNewNumberPlate()
 		mysql_free_result();
 	
 	}
-	
+	queryStr[0] = EOS;
 	strcat(plate, platewithoutformatcolor);
 	strcat(plate, "{000000}");
-	
+	format(queryStr, sizeof(queryStr), "UPDATE `Vehicles` SET `Plate` = '%s' WHERE `ID` = '%i';", plate, VehicleInfo[vehicleid][vID]);
+	mysql_query(queryStr);
 	return platewithoutformatcolor;
 	
 }
