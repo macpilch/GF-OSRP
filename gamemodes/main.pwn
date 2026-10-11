@@ -4,7 +4,7 @@
 	File name: main.pwn
 	Date: 12.03.2026
 	Modified: 12.03.2026
-	Desc: Thx for this code.
+	Desc: Main file.
 */
 
 // Rozmiar stosu:

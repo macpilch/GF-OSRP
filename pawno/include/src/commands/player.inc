@@ -382,6 +382,10 @@ CMD:dajtablice(playerid, params[]) {
 	}
 
 	format(VehicleInfo[vehicleid][vPlate], 32, "%s", GenerateNewNumberPlate());
-	RespawnVehicle(vehicleid);
+
+	SetVehicleNumberPlate(vehicleid, VehicleInfo[vehicleid][vPlate]);
+	SetVehicleToRespawn(vehicleid);
+
+	SaveVehicleData(vehicleid, VEHICLE_SAVE_TEXT);
 	return 1;
 }

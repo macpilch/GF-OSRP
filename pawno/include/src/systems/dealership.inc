@@ -1,6 +1,6 @@
 /*
 	Project: GodFather
-	Author: MisterMagik, steeZ, Claude Speed
+	Author: steeZ, Claude Speed
 	File name: dealership.inc
 	Date: 12.03.2026
 	Modified: 12.03.2026
@@ -74,7 +74,7 @@ stock InitDealershipData() {
 		if(DealershipInfo[i][dPickupPos][0] != 0.0 && DealershipInfo[i][dPickupPos][1] != 0.0) {
 			DealershipInfo[i][dPickupID] = CreateDynamicPickup(1239, 1, DealershipInfo[i][dPickupPos][0], DealershipInfo[i][dPickupPos][1], DealershipInfo[i][dPickupPos][2], 0, 0, -1, 100.0);
 
-			CreateDynamicMapIcon(DealershipInfo[i][dPickupPos][0], DealershipInfo[i][dPickupPos][1], DealershipInfo[i][dPickupPos][2], 55, COLOR_WHITE, 0, 0, -1, 1000.0, MAPICON_GLOBAL, -1, 0);
+			CreateDynamicMapIcon(DealershipInfo[i][dPickupPos][0], DealershipInfo[i][dPickupPos][1], DealershipInfo[i][dPickupPos][2], 55, COLOR_WHITE, 0, 0, -1, 500.0, MAPICON_GLOBAL, -1, 0);
 		}
 	}
 
@@ -347,7 +347,7 @@ stock ShowDealershipInterface(playerid, DealershipId) {
 	pDealershipStep[playerid] = 0;
 	pDealershipOffer[playerid] = 0;
 	pDealershipColor[playerid] = 0;
-	pDealershipFuel[playerid] = VEHICLE_ENGINE_NONE;
+	pDealershipFuel[playerid] = VEHICLE_ENGINE_PETROL; // 1 paliwo do wyboru
 	pDealershipLastUDKey[playerid] = 0;
 	pDealershipLastLRKey[playerid] = 0;
 
@@ -502,7 +502,7 @@ stock BackDealershipKeyStep(playerid) {
 
 // steeZ
 /*
-	Te 2 funkcje szukaj¹ wolnego miesjca na parkingu, jest ich 8.
+	Te 2 funkcje szukaj¹ wolnego miesjca na parkingu, jest ich 6.
 	Je¿eli jakiœ gracz kupi auto i zostawi je przy biznesie, kolejny
 	gracz mo¿e je kupowaæ, bed¹ pojawia³y siê one obok siebie w odstêpach.
 */

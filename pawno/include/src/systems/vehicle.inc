@@ -1,11 +1,11 @@
 /*
 	Project: GodFather
-	Author: MisterMagik, steeZ
+	Author: steeZ
 	File name: vehicle.inc
 	Date: 12.03.2026
 	Modified: 12.03.2026
 	Desc: Vehicle system.
-	
+
 	Wszystko z pojazdami.
 */
 
@@ -13,7 +13,7 @@ stock InitVehicleData() {
 	printf("[POJAZD] Zaczynam ladowac pojazdy...");
 
 	new id;
-	new colorStr[16], posStr[32], windowStr[16], componentStr[82];
+	new colorStr[16], posStr[64], windowStr[16], componentStr[82];
 
 	queryStr[0] = EOS;
 	format(queryStr, sizeof(queryStr), "SELECT `ID`, `OwnerID`, `OwnerType`, `BizID`, `AccessID`, `RentID`, `ModelID`, `EngineType`, `Color`, `Pos`, `Fuel`, `Locked`, `Engine`, `EngineHp`, `Spawned`, `LightsOn`, `Window`, `Accessories`, `Panels`, `Doors`, `Lights`, `Tires`, `Vw`, `Int`, `Paintjob`, `Nitro`, `Components`, `Repair`, `Mileage`, `Block`, `Plate`, `Desc` FROM `Vehicles`");
@@ -25,7 +25,7 @@ stock InitVehicleData() {
 		while(mysql_fetch_row(queryStr, "|")) {
 			id++;
 
-			sscanf(queryStr, "p<|>iiiis[32]iiis[8]s[64]fiifiis[16]iiiiiiiifs[82]ffis[32]s[128]",
+			sscanf(queryStr, "p<|>iiiis[32]iiis[16]s[64]fiifiis[16]iiiiiiiifs[82]ffis[32]s[128]",
 				VehicleInfo[id][vID],
 				VehicleInfo[id][vOwnerID],
 				VehicleInfo[id][vOwnerType],
@@ -370,6 +370,16 @@ stock SaveVehicleData(vehicleid, option) {
 		strcat(queryStr, QueryTmp);
 	}
 
+	if(option & VEHICLE_SAVE_TEXT) {
+		format(QueryTmp, sizeof(QueryTmp), "`Plate` = '%s', `Desc` = '%s'", VehicleInfo[vehicleid][vPlate], VehicleInfo[vehicleid][vDesc]);
+
+		if(Fields++) {
+			strcat(queryStr, ", ");
+		}
+
+		strcat(queryStr, QueryTmp);
+	}
+
 	if(!Fields) {
 		return 1;
 	}
@@ -378,6 +388,14 @@ stock SaveVehicleData(vehicleid, option) {
 	strcat(queryStr, QueryTmp);
 	mysql_query(queryStr);
 	return 1;
+}
+
+stock SaveVehicleAllData() {
+	foreach(new v : VehItter) {
+		if(VehicleInfo[v][vSpawned]) {
+			SaveVehicleData(v, VEHICLE_SAVE_ALL);
+		}
+	}
 }
 
 stock SpawnVehicle(vehicleid) {
@@ -393,15 +411,16 @@ stock SpawnVehicle(vehicleid) {
 
 	if(!strcmp(VehicleInfo[vehicleid][vDesc], "Brak", true)) {
 		format(VehicleInfo[vehicleid][vDesc], 128, " ");
-	} else {
-		VehicleInfo[vehicleid][v3DDesc] = CreateDynamic3DTextLabel(VehicleInfo[vehicleid][vDesc], COLOR_WHITE, 0.0, 0.0, 0.1, 20.0, INVALID_PLAYER_ID, vehicleid, 0, 0, 0, -1, 20.0, -1, 0);
 	}
 
 	VehicleInfo[vehicleid][v3DDesc] = CreateDynamic3DTextLabel(VehicleInfo[vehicleid][vDesc], COLOR_WHITE, 0.0, 0.0, 0.1, 20.0, INVALID_PLAYER_ID, vehicleid, 0, 0, 0, -1, 20.0, -1, 0);
-	if(strcmp(VehicleInfo[vehicleid][vPlate], "Brak") == 0) {
- 		// SetVehicleNumberPlate(vehicleid, "");
-	} 
+
+	if(!strcmp(VehicleInfo[vehicleid][vPlate], "Brak", true)) {
+ 		format(VehicleInfo[vehicleid][vPlate], 32, " ");
+	}
+
 	SetVehicleNumberPlate(vehicleid, VehicleInfo[vehicleid][vPlate]);
+
 	if(IsABicycle(VehicleInfo[vehicleid][vModelID])) {
 		SetVehicleParamsEx(vehicleid, 1, 0, 0, 0, 0, 0, 0);
 	} else {
@@ -411,6 +430,8 @@ stock SpawnVehicle(vehicleid) {
 		SetVehicleParamsEx(vehicleid, VehicleInfo[vehicleid][vEngine], VehicleInfo[vehicleid][vLightsOn], Alarm, VehicleInfo[vehicleid][vLocked], Bonnet, Boot, Objective);
 	}
 
+	// Kolor, HP i paintjob s¹ ustawiane w callbackach, tutaj nie dzia³a!
+	//
 	SetVehicleVirtualWorld(vehicleid, VehicleInfo[vehicleid][vVw]);
 	LinkVehicleToInterior(vehicleid, VehicleInfo[vehicleid][vInt]);
 
@@ -752,12 +773,4 @@ stock GenerateNewNumberPlate()
 	
 	return platewithoutformatcolor;
 	
-}
-
-stock RespawnVehicle(vehicleid) {
-	VehicleInfo[vehicleid][vSpawned] = false;
-	UnSpawnVehicle(vehicleid);
-	VehicleInfo[vehicleid][vSpawned] = true;
-	SpawnVehicle(vehicleid);
-	return 1;
 }

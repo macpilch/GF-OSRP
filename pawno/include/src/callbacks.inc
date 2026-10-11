@@ -202,6 +202,8 @@ sampCallback OnGameModeExit() {
 			SetPlayerName(i, accName[i]);
 		}
 	}
+
+	SaveVehicleAllData();
 	return 1;
 }
 
@@ -338,6 +340,15 @@ sampCallback OnPlayerDisconnect(playerid, reason) {
 				DisablePlayerCheckpoint(i);
 		    }
 	    }
+	}
+
+	// Dla bezpieczeñstwa niech tu zapisuje
+	foreach(new v : VehItter) {
+		if(playerid == VehicleInfo[v][vDriverID] && VehicleInfo[v][vSpawned]) {
+			VehicleInfo[v][vDriverID] = INVALID_PLAYER_ID;
+
+			SaveVehicleData(v, VEHICLE_SAVE_ALL);
+		}
 	}
 
 	if(GettingCK[playerid] < 999) {
@@ -866,30 +877,36 @@ sampCallback OnPlayerDeath(playerid, killerid, reason)
 }
 
 sampCallback OnVehicleSpawn(vehicleid) {
-	if(!strcmp(VehicleInfo[vehicleid][vPlate], "Brak", true)) {
+	/*if(!strcmp(VehicleInfo[vehicleid][vPlate], "Brak", true)) {
 		SetVehicleNumberPlate(vehicleid, " ");
 	} else {
 		SetVehicleNumberPlate(vehicleid, VehicleInfo[vehicleid][vPlate]);
-	}
+	}*/
 
-	SetVehicleHealth(vehicleid, VehicleInfo[vehicleid][vEngineHp]);
+	ChangeVehicleColor(vehicleid, VehicleInfo[vehicleid][vColor][0], VehicleInfo[vehicleid][vColor][1]);
 
 	VehicleInfo[vehicleid][vSpawned] = true;
 	return 1;
 }
 
 sampCallback OnVehicleStreamIn(vehicleid, forplayerid) {
-	if(VehicleInfo[vehicleid][vSpawned]) {
-		SetVehicleParamsForPlayer(vehicleid, forplayerid, false, VehicleInfo[vehicleid][vLocked]);
+	if(!VehicleInfo[vehicleid][vSpawned]) {
+		return 1;
 	}
 
-	if(!strcmp(VehicleInfo[vehicleid][vPlate], "Brak", true)) {
+	SetVehicleParamsForPlayer(vehicleid, forplayerid, false, VehicleInfo[vehicleid][vLocked]);
+	//
+	/*if(!strcmp(VehicleInfo[vehicleid][vPlate], "Brak", true)) {
 		SetVehicleNumberPlate(vehicleid, " ");
 	} else {
 		SetVehicleNumberPlate(vehicleid, VehicleInfo[vehicleid][vPlate]);
-	}
-
+	}*/
+	//
 	SetVehicleHealth(vehicleid, VehicleInfo[vehicleid][vEngineHp]);
+	return 1;
+}
+
+sampCallback OnVehicleStreamOut(vehicleid, forplayerid) {
 	return 1;
 }
 
@@ -2630,7 +2647,7 @@ sampCallback OnPlayerStateChange(playerid, newstate, oldstate)
 		if(GetClosestVehicle(playerid) == newcar) {
 			if(VehicleInfo[newcar][vOwnerType] != VEHICLE_OWNER_TYPE_NONE && VehicleInfo[newcar][vOwnerType] != VEHICLE_OWNER_TYPE_SERVER) {
 				mainStr[0] = EOS;
-				format(mainStr, sizeof(mainStr), "W a ciciel: %s", GetVehicleOwnerName(newcar));
+				format(mainStr, sizeof(mainStr), "W³aœciciel: %s", GetVehicleOwnerName(newcar));
 				SendClientMessage(playerid, COLOR_YELLOW, mainStr);
 			}
 
