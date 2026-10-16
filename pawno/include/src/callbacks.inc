@@ -42,6 +42,7 @@ sampCallback OnGameModeInit() {
 	LoadPapers();*/
 	InitServerObjects();
 	TextDrawsInit();
+	InitItemData();
 	InitVehicleData();
 	InitDealershipData();
 	CreateTrashJobObjects();
@@ -3006,11 +3007,11 @@ Callback LoadIntro(playerid) {
 
 	loadedIntro[playerid] = true;
 
-	for(new i = 0; i < 20; i++) {
+	for(new i = 0; i < 10; i++) {
 		SendClientMessage(playerid, COLOR_GREY, " ");
 	}
 
-	SendClientMessage(playerid, COLOR_YELLOW, "Witaj w "SERVER_NAME": Prosz  czeka  na za adowanie mapy "SERVER_SHORT_NAME" "SERVER_VERSION".");
+	SendClientMessage(playerid, COLOR_YELLOW, "Witaj w "SERVER_NAME": Proszê czekaæ na za³adowanie mapy "SERVER_SHORT_NAME" "SERVER_VERSION"");
 	TextDrawHideForPlayer(playerid, SplashScreen);
 
 	for(new i = 0; i < 4; i++) {
@@ -3030,7 +3031,7 @@ Callback LoadIntro(playerid) {
 		if(mysql_result_stored()) {
 			if(mysql_num_rows() < 1) {
 				gPlayerAccount[playerid] = 0;
-				SendClientMessage(playerid, COLOR_YELLOW2, "Serwer: To konto nie jest jeszcze zarejestrowane, aby zagra  musisz si  zarejestrowa .");
+				SendClientMessage(playerid, COLOR_YELLOW2, "Serwer: To konto nie jest jeszcze zarejestrowane, aby zagraæ musisz siê zarejestrowaæ.");
 
 				mainStr[0] = EOS;
 				strcat(mainStr, "{FFFFFF}Kompletny regulamin serwera {FFC801}"SERVER_NAME" {FFFFFF}znajduje si  na naszej stronie internetowej "WEBSITE_URL".\n");
@@ -3040,7 +3041,7 @@ Callback LoadIntro(playerid) {
 				osrp_ShowPlayerDialog(playerid, DIALOG_REGISTER_RULES, DIALOG_STYLE_MSGBOX, "Regulamin:", mainStr, "Akceptuj", "Odrzu ");
 			} else {
 				gPlayerAccount[playerid] = 1;
-				SendClientMessage(playerid, COLOR_YELLOW2, "Serwer: To konto jest ju  zarejestrowane. Mo esz si  zalogowa .");
+				SendClientMessage(playerid, COLOR_YELLOW2, "Serwer: To konto jest ju¿ zarejestrowane. Mo¿esz siê zalogowaæ.");
 
 				queryStr[0] = EOS;
 				format(queryStr, sizeof(queryStr), "SELECT `Password`, `Salt` FROM `Accounts` WHERE `Name` = '%s' LIMIT 1", escapedName[playerid]);
@@ -3067,7 +3068,15 @@ Callback RelogCharacter(playerid) {
 	GetPlayerName(playerid, PlayerInfo[playerid][pName], 24);
 	SetPlayerName(playerid, accName[playerid]);
 
+	PlayerInfo[playerid][pUsedRelog] = false;
+	Spawned[playerid] = false;
+
 	PlayerPlaySound(playerid, 1187, 0.0, 0.0, 0.0);
+
+	TextDrawHideForPlayer(playerid, HealthInfo[playerid][0]);
+	TextDrawHideForPlayer(playerid, HealthInfo[playerid][1]);
+
+	HideProgressBarForPlayer(playerid, HungerBar[playerid]);
 
 	for(new i = 0; i < 4; i++) {
 		TextDrawShowForPlayer(playerid, Intro[i]);
@@ -3078,6 +3087,6 @@ Callback RelogCharacter(playerid) {
 
 	mainStr[0] = EOS;
 	format(mainStr, sizeof(mainStr), "Opcje konta %s:", accName[playerid]);
-	osrp_ShowPlayerDialog(playerid, DIALOG_ACCOUNT_OPTIONS, DIALOG_STYLE_LIST, mainStr, "{FFFFFF}Zaloguj si  na posta \nStw rz now  posta \nUsu  istniej c  posta \nAnty Crash\nZmie  has o do konta", "Dalej", "");
+	osrp_ShowPlayerDialog(playerid, DIALOG_ACCOUNT_OPTIONS, DIALOG_STYLE_LIST, mainStr, "{FFFFFF}Zaloguj siê na postaæ\nStwórz now¹ postaæ\nUsuñ istniej¹c¹ postaæ\nAnty Crash\nZmieñ has³o do konta", "Dalej", "");
 	return 1;
 }

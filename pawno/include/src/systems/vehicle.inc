@@ -518,6 +518,14 @@ Callback VehicleEngineStarting(vehicleid) {
 		return 1;
 	}
 
+	if(VehicleInfo[vehicleid][vEngineHp] <= 300.0) {
+		return SendClientMessage(driverid, COLOR_YELLOW, "Ten pojazd jest zepsuty, nie mo na go uruchomi . Aby go naprawi  musisz wezwa  mechanika.");
+	}
+
+	if(VehicleInfo[vehicleid][vFuel] <= 0.0) {
+		return SendClientMessage(driverid, COLOR_YELLOW, "Nie mo¿esz odpaliæ silnika, poniewa¿ nie ma paliwa w tym pojeŸdzie.");
+	}
+
 	if(IsABike(vehicleid)) {
 		ApplyAnimation(driverid, "CARRY", "crry_prtial", 4.0, 0, 0, 0, 0, 0, 0);
 	} else {
@@ -533,20 +541,12 @@ Callback VehicleEngineStarting(vehicleid) {
 
 		GetVehicleParamsEx(vehicleid, Engine, Lights, Alarm, Doors, Bonnet, Boot, Objective);
 		SetVehicleParamsEx(vehicleid, VehicleInfo[vehicleid][vEngine], Lights, Alarm, Doors, Bonnet, Boot, Objective);
-		return SendClientMessage(driverid, COLOR_YELLOW, "Wy  czy e  silnik.");
-	}
-
-	if(VehicleInfo[vehicleid][vEngineHp] <= 300.0) {
-		return SendClientMessage(driverid, COLOR_YELLOW, "Ten pojazd jest zepsuty, nie mo na go uruchomi . Aby go naprawi  musisz wezwa  mechanika.");
-	}
-
-	if(VehicleInfo[vehicleid][vFuel] <= 0.0) {
-		return SendClientMessage(driverid, COLOR_YELLOW, "Nie mo esz odpali  silnika, poniewa  nie ma paliwa w tym poje dzie.");
+		return SendClientMessage(driverid, COLOR_YELLOW, "Wy³¹czy³eœ silnik.");
 	}
 
 	VehAnim[driverid] = true;
 
-	SendClientMessage(driverid, COLOR_YELLOW, "Pr bujesz odpali  silnik...");
+	SendClientMessage(driverid, COLOR_YELLOW, "Próbujesz odpaliæ silnik...");
 	SetTimerEx("VehicleEngineOn", 2500, false, "i", vehicleid);
 	return 1;
 }
@@ -566,7 +566,7 @@ Callback VehicleEngineOn(vehicleid) {
 	VehAnim[driverid] = false;
 
 	if((VehicleInfo[vehicleid][vEngineHp] > 300.0 && VehicleInfo[vehicleid][vEngineHp] < 600.0) && (rand == 0 || rand == 2 || rand == 4)) {
-		SendClientMessage(driverid, COLOR_YELLOW, "Nie uda o si  odpali  silnika.");
+		SendClientMessage(driverid, COLOR_YELLOW, "Nie uda³o siê odpaliæ silnika.");
 	} else if((VehicleInfo[vehicleid][vEngineHp] > 600.0) || (VehicleInfo[vehicleid][vEngineHp] < 600.0 && (rand == 1 || rand == 3))) {
 		new engine, lights, alarm, doors, bonnet, boot, objective;
 
@@ -575,7 +575,7 @@ Callback VehicleEngineOn(vehicleid) {
 		GetVehicleParamsEx(vehicleid, engine, lights, alarm, doors, bonnet, boot, objective);
 		SetVehicleParamsEx(vehicleid, VehicleInfo[vehicleid][vEngine], lights, alarm, doors, bonnet, boot, objective);
 
-		SendClientMessage(driverid, COLOR_YELLOW, "Odpali e  silnik.");
+		SendClientMessage(driverid, COLOR_YELLOW, "Odpali³eœ silnik.");
 	}
 	return 1;
 }
@@ -682,19 +682,19 @@ stock GetVehicleEngineTypeName(vehicleid) {
 	new Name[32];
 
 	switch(VehicleInfo[vehicleid][vEngineType]) {
-		case -1: {
+		case VEHICLE_ENGINE_NONE: {
 			Name = "Brak";
 		}
-		case 0: {
+		case VEHICLE_ENGINE_PETROL: {
 			Name = "Benzyna";
 		}
-		case 1: {
+		case VEHICLE_ENGINE_DIESEL: {
 			Name = "Olej napedowy";
 		}
-		case 2: {
+		case VEHICLE_ENGINE_ELECTRIC: {
 			Name = "Bateria";
 		}
-		case 3: {
+		case VEHICLE_ENGINE_AVIATION: {
 			Name = "Paliwo lotnicze";
 		}
 	}

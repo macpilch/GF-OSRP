@@ -7,18 +7,25 @@
 	Desc: Player commands.
 */
 
+CMD:p(playerid, params[]) {
+	ShowItemMenuForPlayer(playerid);
+	return 1;
+}
+
 CMD:pojazdy(playerid, params[]) {
 	new VehCount;
-	new title[64];
+	new Title[64], String[1024];
 
-	mainStr[0] = EOS;
-	strcat(mainStr, "{FFFFFF}Pojazd\t\t{FFFFFF}Przebieg\t{FFFFFF}Tablica\t{FFFFFF}Opis");
+	String[0] = EOS;
+	strcat(String, "{FFFFFF}Pojazd\t\t{FFFFFF}Przebieg\t{FFFFFF}Tablica\t{FFFFFF}Opis");
 
 	foreach(new i : VehItter) {
 		if(VehicleInfo[i][vOwnerType] == VEHICLE_OWNER_TYPE_PLAYER) {
 			if(VehicleInfo[i][vOwnerID] == PlayerInfo[playerid][pID]) {
+				// Zawsze pojazdy musz¹ byæ zespawnowane je¿eli istniej¹
 				if(VehicleInfo[i][vSpawned]) {
-					format(mainStr, sizeof(mainStr), "%s\n{FFC801}%s {FFFFFF}(id: %d)\t%d KM\t%s\t%s", mainStr, VehicleNames[VehicleInfo[i][vModelID] - 400], i, FloatToInt(VehicleInfo[i][vMileage]), VehicleInfo[i][vPlate], VehicleInfo[i][vDesc]);
+					format(String, sizeof(String), "%s\n{FFC801}%s {FFFFFF}(id: %d)\t%d KM\t%s\t%s", String, VehicleNames[VehicleInfo[i][vModelID] - 400], i, FloatToInt(VehicleInfo[i][vMileage]), VehicleInfo[i][vPlate], VehicleInfo[i][vDesc]);
+
 					VehCount++;
 				}
 			}
@@ -29,8 +36,8 @@ CMD:pojazdy(playerid, params[]) {
 		return SendClientMessage(playerid, COLOR_GRAD1, "Nie posiadasz ¿adnych pojazdów.");
 	}
 
-	format(title, sizeof(title), "{FFC801}Twoje pojazdy (Limit %d/%d):", VehCount, MAX_PLAYER_VEHS);
-	osrp_ShowPlayerDialog(playerid, DIALOG_SHOW_PLAYER_VEHICLES, DIALOG_STYLE_TABLIST_HEADERS, title, mainStr, "Wybierz", "Anuluj");
+	format(Title, sizeof(Title), "{FFC801}Twoje pojazdy (Limit %d/%d):", VehCount, MAX_PLAYER_VEHS);
+	osrp_ShowPlayerDialog(playerid, DIALOG_SHOW_PLAYER_VEHICLES, DIALOG_STYLE_TABLIST_HEADERS, Title, String, "Wybierz", "Anuluj");
 	return 1;
 }
 
@@ -115,7 +122,12 @@ CMD:relog(playerid, params[]) {
 		return 1;
 	}
 
+	if(PlayerInfo[playerid][pUsedRelog]) {
+		return 1;
+	}
+
 	SendClientMessage(playerid, COLOR_GREY, "Zostaniesz wylogowany z tej postaci za 10 sekund.");
+	PlayerInfo[playerid][pUsedRelog] = true;
 
 	SavePlayerData(playerid);
 	SetTimerEx("RelogCharacter", 10000, false, "i", playerid);

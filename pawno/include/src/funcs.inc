@@ -14,26 +14,27 @@ stock ConnectingMySQL() {
 	if(!mysql_ping()) {
 		printf("[MYSQL] Pomyslnie polaczono z baza danych!");
 	} else {
-		new error[64];
+		new Error[64];
 
-		mysql_error(error);
+		mysql_error(Error);
 
-		printf("[MYSQL] Brak polacznia z baza danych! Blad: %s", error);
+		printf("[MYSQL] Brak polaczenia z baza danych! Blad: %s", Error);
 		SendRconCommand("exit");
 	}
 }
 
 stock osrp_ShowPlayerDialog(playerid, dialogid, style, caption[], info[], button1[], button2[]) {
-	new title[64];
+	new Title[64];
 
-	format(title, sizeof(title), "{FFC801}%s", caption);
+	format(Title, sizeof(Title), "{FFC801}%s", caption);
 
 	PlayerInfo[playerid][pDialog] = dialogid;
-	return ShowPlayerDialog(playerid, dialogid, style, title, info, button1, button2);
+	return ShowPlayerDialog(playerid, dialogid, style, Title, info, button1, button2);
 }
 
 stock osrp_TogglePlayerSpectating(playerid, toggle) {
 	PlayerInfo[playerid][pToggle] = bool:toggle;
+
 	TogglePlayerSpectating(playerid, toggle);
 }
 
@@ -196,7 +197,7 @@ stock ClearPlayerData(playerid) {
 	ProposedTo[playerid] = 999;
 	GotProposedBy[playerid] = 999;
 	DivorceOffer[playerid] = 999;
-	pChosenItemID[playerid] = -1;
+	pItemSelected[playerid] = INVALID_ID;
 	GivePlayerMoney(playerid,PlayerInfo[playerid][pCash]);
 
 	PlayerInfo[playerid][pLevel] = 0;
@@ -284,6 +285,7 @@ stock ClearPlayerData(playerid) {
 	PlayerInfo[playerid][pWarns] = 0;
 	PlayerInfo[playerid][pFuel] = 0;
 	PlayerInfo[playerid][pAdjustable] = 0;
+	PlayerInfo[playerid][pUsedRelog] = false;
 	return 1;
 }
 
@@ -812,7 +814,7 @@ stock ClearMarriage(playerid)
 	if(IsPlayerConnected(playerid))
 	{
 	    new string[MAX_PLAYER_NAME];
-		format(string, sizeof(string), "No-one");
+		format(string, sizeof(string), "Brak");
 		strmid(PlayerInfo[playerid][pMarriedTo], string, 0, strlen(string), 255);
 		PlayerInfo[playerid][pMarried] = 0;
 	}
@@ -1716,16 +1718,24 @@ stock PrintBizInfo(playerid,targetid)
 }
 
 stock ShowStats(playerid, targetid) {
-	/*new cash =  GetPlayerMoney(targetid);
+	new cash =  GetPlayerMoney(targetid);
 	new atext[20];
 
-	if(PlayerInfo[targetid][pSex] == 1) { atext = "Male"; }
-	else if(PlayerInfo[targetid][pSex] == 2) { atext = "Female"; }
+	atext = GetPlayerSex(playerid);
 
   	new otext[20];
-	if(PlayerInfo[targetid][pOrigin] == 1) { otext = "USA"; }
-	else if(PlayerInfo[targetid][pOrigin] == 2) { otext = "Europe"; }
-	else if(PlayerInfo[targetid][pOrigin] == 3) { otext = "Asia"; }
+	otext = GetPlayerOrigin(playerid);
+
+  	new ctext[20];
+	ctext = GetPlayerContinent(playerid);
+
+	new stext[20];
+	if(PlayerInfo[playerid][pSilhouette] == 3) { stext = "Napakowany"; }
+	else { stext = "Brak"; }
+
+	new cotext[20];
+	if(PlayerInfo[playerid][pCondition] == 3) { cotext = "Doskona³a"; }
+	else { cotext = "Brak"; }
 
 	new ttext[20];
 	if(PlayerInfo[targetid][pMember] == 4 || PlayerInfo[targetid][pLeader] == 4) { ttext = "Medic"; }
@@ -1747,7 +1757,7 @@ stock ShowStats(playerid, targetid) {
 	else if(STDPlayer[targetid] == 3) { dtext = "Syphilis"; }
 	else { dtext = "None"; }
 
-	new ftext[20];
+/*	new ftext[20];
 	if(PlayerInfo[targetid][pMember] == 4 || PlayerInfo[targetid][pLeader] == 4)
 	{ ftext = "Firemen/Paramedics"; }
   	else if(PlayerInfo[targetid][pMember] == 5 || PlayerInfo[targetid][pLeader] == 5)
@@ -1761,7 +1771,7 @@ stock ShowStats(playerid, targetid) {
 
 	new f2text[20];
 	if(PlayerInfo[targetid][pFMember] < 255) { f2text = FamilyInfo[PlayerInfo[targetid][pFMember]][FamilyName]; }
-	else { f2text = "None"; }
+	else { f2text = "None"; }*/
 
 	new rtext[64];
 	if(gTeam[targetid] == 5 || PlayerInfo[targetid][pFMember] < 255)//The 2 Organisations
@@ -1865,32 +1875,52 @@ stock ShowStats(playerid, targetid) {
     else if(PlayerInfo[targetid][pJob] == 14) { jtext = "Bus Driver"; }
     else if(PlayerInfo[targetid][pJob] == 15) { jtext = "Paper Boy"; }
     else if(PlayerInfo[targetid][pJob] == 16) { jtext = "Trucker"; }
-    else { jtext = "None"; }
+    else { jtext = "Brak"; }
 
 	new drank[20];
 	if(PlayerInfo[targetid][pDonateRank] == 1) { drank = "Power User"; }
-	else if(PlayerInfo[targetid][pDonateRank] >= 2) { drank = "Donater"; }
-	else { drank = "None"; }
+	else if(PlayerInfo[targetid][pDonateRank] >= 2) { drank = "Super Premium"; }
+	else { drank = "Zwyk³e"; }
+
+	new fstext[20];
+	if(PlayerInfo[playerid][pFightStyle] == 2) { fstext = "Tajski Boks"; }
+	else { fstext = "Brak"; }
 
 	new married[20];
 	strmid(married, PlayerInfo[targetid][pMarriedTo], 0, strlen(PlayerInfo[targetid][pMarriedTo]), 255);
 
+	new atime;
+
+	queryStr[0] = EOS;
+	format(queryStr, sizeof(queryStr), "SELECT SUM(`ConnectedTime`) FROM `Characters` WHERE `AID` = '%d' LIMIT 0,1", PlayerInfo[playerid][pAID]);
+	mysql_query(queryStr);
+
+	mysql_store_result();
+
+	if(mysql_result_stored()) {
+		atime = mysql_fetch_int();
+	}
+
+	mysql_free_result();
+
 	new age = PlayerInfo[targetid][pAge];
 	new ptime = PlayerInfo[targetid][pConnectTime];
 	new lotto = PlayerInfo[targetid][pLottoNr];
-	new deaths = PlayerInfo[targetid][pDeaths];
+	new lottostr[8];
+	valstr(lottostr, lotto, false);
+	//new deaths = PlayerInfo[targetid][pDeaths];
 	new fishes = PlayerInfo[targetid][pFishes];
-	new bigfish = PlayerInfo[targetid][pBiggestFish];
+	//new bigfish = PlayerInfo[targetid][pBiggestFish];
 	new crimes = PlayerInfo[targetid][pCrimes];
 	new arrests = PlayerInfo[targetid][pArrested];
-	new warrests = PlayerInfo[targetid][pWantedDeaths];
-	new drugs = PlayerInfo[targetid][pDrugs];
-	new mats = PlayerInfo[targetid][pMats];
-	new wanted = WantedLevel[targetid];*/
+	//new warrests = PlayerInfo[targetid][pWantedDeaths];
+	//new drugs = PlayerInfo[targetid][pDrugs];
+	//new mats = PlayerInfo[targetid][pMats];
+	new wanted = WantedLevel[targetid];
 	new level = PlayerInfo[targetid][pLevel];
 	new exp = PlayerInfo[targetid][pExp];
 	//new kills = PlayerInfo[targetid][pKills];
-	//new pnumber = PlayerInfo[targetid][pPnumber];
+	new pnumber = PlayerInfo[targetid][pPnumber];
 	//new account = PlayerInfo[targetid][pAccount];
 	new nxtlevel = PlayerInfo[targetid][pLevel]+1;
 	new expamount = nxtlevel*levelexp;
@@ -1904,23 +1934,23 @@ stock ShowStats(playerid, targetid) {
 
 	format(coordsstring, sizeof(coordsstring), "___________________ Nick OOC: %s ___________________", accName[playerid]);
 	SendClientMessage(playerid, COLOR_GREEN, coordsstring);
-	format(coordsstring, sizeof(coordsstring), "Nick: [%s] Poziom: [%d] Doœwiadczenie: [%d/%d] Konto: [%s] Punkty Premium: [%d] Punkty Nagród: [%d] Warny: [%d]", PlayerInfo[playerid][pName], level, exp, expamount);
+	format(coordsstring, sizeof(coordsstring), "Nick: [%s] Poziom: [%d] Doœwiadczenie: [%d/%d] Konto: [%s] Punkty Premium: [%d] Punkty Nagród: [%d] Warny: [%d]", PlayerInfo[playerid][pName], level, exp, expamount, drank, PlayerInfo[playerid][gPupgrade], PlayerInfo[playerid][gPrewards], PlayerInfo[playerid][pWarns]);
 	SendClientMessage(playerid, COLOR_GRAD1,coordsstring);
-	format(coordsstring, sizeof(coordsstring), "P³eæ: [%s] Wiek: [%d] Pochodzenie: [%s] Rasa: [%s] Telefon: [%d] Godzin na serwerze: [%d postaæ / %d konto]");
+	format(coordsstring, sizeof(coordsstring), "P³eæ: [%s] Wiek: [%d] Pochodzenie: [%s] Rasa: [%s] Telefon: [%d] Godzin na serwerze: [%d postaæ / %d konto]", atext, age, ctext, otext, pnumber, ptime, atime);
 	SendClientMessage(playerid, COLOR_GRAD3,coordsstring);
-	format(coordsstring, sizeof(coordsstring), "Pieni¹dze: [$%d] Przestêpstwa: [%d] Aresztowany: [%d] Poziom poszukiwania: [%d] Sylwetka: [%s] Kondycja: [%s]");
+	format(coordsstring, sizeof(coordsstring), "Pieni¹dze: [$%d] Przestêpstwa: [%d] Aresztowany: [%d] Poziom poszukiwania: [%d] Sylwetka: [%s] Kondycja: [%s]", cash, crimes, arrests, wanted, stext, cotext);
 	SendClientMessage(playerid, COLOR_GRAD4,coordsstring);
-	format(coordsstring, sizeof(coordsstring), "Z³apanych ryb: [%d] U¿ywana przynêta: [%s] Œlub z: [%s] Numer Lotto: [%s] Styl walki: [%s]");
+	format(coordsstring, sizeof(coordsstring), "Z³apanych ryb: [%d] U¿ywana przynêta: [%s] Œlub z: [%s] Numer Lotto: [%s] Styl walki: [%s]", fishes, "Brak", married, (lotto > 0) ? lottostr : ("Brak"), fstext);
 	SendClientMessage(playerid, COLOR_GRAD5,coordsstring);
-	format(coordsstring, sizeof(coordsstring), "Choroba: [%s] Organizacja: [%s] Ranga: [%s] Praca: [%s]");
+	format(coordsstring, sizeof(coordsstring), "Choroba: [%s] Organizacja: [%s] Ranga: [%s] Praca: [%s]", dtext, ttext, rtext, jtext);
 	SendClientMessage(playerid, COLOR_GRAD5,coordsstring);
 
 	if(PlayerInfo[playerid][pAdmin] >= 1) {
-		format(coordsstring, sizeof(coordsstring), "Int: [%d] World: [%d] Lokal: [%d] Dom: [%d] Biz: [%d] Pojazdy: [%d][%d][%d][%d][%d] Prawko: [B:1 C:1] FL: [%d] Bank: [$%d]", housekey,bizkey,HireCar[targetid],intir,local);
+		format(coordsstring, sizeof(coordsstring), "Int: [%d] World: [%d] Lokal: [%d] Dom: [%d] Biz: [%d] Pojazdy: [%d][%d][%d][%d][%d] Prawko: [B:1 C:1] FL: [0] Bank: [$%d]", housekey,bizkey,HireCar[targetid],intir,local);
 		SendClientMessage(playerid, COLOR_GRAD6,coordsstring);
 	}
 
-	SendClientMessage(playerid, COLOR_GREEN,"___________________________________________________________");
+	SendClientMessage(playerid, COLOR_GREEN,"_____________________________________________________________");
 }
 //---------------------------------------------------------
 
@@ -3078,10 +3108,7 @@ stock OnPlayerLogin(playerid, name[]) {
 
 	PlayerInfo[playerid][pAdjustable] = 0;
 	ResetPlayerMoney(playerid);
-	ConsumingMoney[playerid] = 1;
 	Spawned[playerid] = true;
-	GivePlayerMoney(playerid,PlayerInfo[playerid][pCash]);
-	CurrentMoney[playerid] = PlayerInfo[playerid][pCash];
 	osrp_TogglePlayerSpectating(playerid, 0);
 
 	if(PlayerInfo[playerid][pReg] == 0) {
@@ -3128,10 +3155,14 @@ stock OnPlayerLogin(playerid, name[]) {
 		PlayerInfo[playerid][pPbiskey] = 255;
 		PlayerInfo[playerid][pAccount] = 0;
 		PlayerInfo[playerid][pReg] = 1;
+		PlayerInfo[playerid][pCash] = 5000;
 
-		GivePlayerMoney(playerid, 5000);
 		osrp_ShowPlayerDialog(playerid, DIALOG_TUTORIAL, DIALOG_STYLE_MSGBOX, "Tutorial:", "{FFFFFF}To Twoje pierwsze logowanie na t¹ postaæ.\nCzy chcesz zobaczyæ tutorial?", "Tak", "Nie");
 	}
+
+	ConsumingMoney[playerid] = 1;
+	GivePlayerMoney(playerid,PlayerInfo[playerid][pCash]);
+	CurrentMoney[playerid] = PlayerInfo[playerid][pCash];
 
 	if(PlayerInfo[playerid][pLevel] == -999) { //autoban
 		Ban(playerid);
@@ -3152,7 +3183,9 @@ stock OnPlayerLogin(playerid, name[]) {
 	}
 
 	if(PlayerInfo[playerid][pDonateRank] > 0) {
-		SendClientMessage(playerid, COLOR_WHITE,"SERVER: You are a Premium Account user.");
+		mainStr[0] = EOS;
+		format(mainStr, sizeof(mainStr), "Serwer: Jesteœ posiadaczem konta {FF8C00}Super Premium{FFFFFF} jeszcze przez {FF0000}%d{FFFFFF} dni.", PlayerInfo[playerid][pDonateRank]);
+		SendClientMessage(playerid, COLOR_WHITE,mainStr);
 	}
 
 	mainStr[0] = EOS;
@@ -3757,7 +3790,7 @@ stock GetPlayerSex(playerid) {
 stock GetPlayerContinent(playerid) {
 	new continent[16];
 
-	switch(PlayerInfo[playerid][pSex]) {
+	switch(PlayerInfo[playerid][pContinent]) {
 		case 0: {
 			continent = "Ameryka";
 		}
@@ -3780,7 +3813,7 @@ stock GetPlayerContinent(playerid) {
 stock GetPlayerOrigin(playerid) {
 	new origin[16];
 
-	switch(PlayerInfo[playerid][pSex]) {
+	switch(PlayerInfo[playerid][pOrigin]) {
 		case 0: {
 			origin = "Bia³a";
 		}
@@ -3800,3 +3833,9 @@ stock FloatToInt(Float:fVal) {
 	format(str, sizeof(str), "%f", fVal);
 	return strval(str);
 }
+
+/*
+git fetch magik
+git merge magik/main
+git push origin main
+*/

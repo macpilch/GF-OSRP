@@ -178,6 +178,7 @@ enum pInfo
 	pAdmin,
 	pDonateRank,
 	gPupgrade,
+	gPrewards,
 	pConnectTime,
 	pReg,
 	pSex,
@@ -194,10 +195,13 @@ enum pInfo
 	pDeaths,
 	pArrested,
 	pWantedDeaths,
+	pCondition,
+	pSilhouette,
 	pPhoneBook,
 	pLottoNr,
 	pFishes,
 	pBiggestFish,
+	pFightStyle,
 	pJob,
 	pPayCheck,
 	pHeadValue,
@@ -269,6 +273,7 @@ enum pInfo
 	pMarriedTo[128],
 	pPickupTime,
 	pDialog,
+	bool:pUsedRelog,
 	bool:pToggle,
 	bool:pFreeze
 };
@@ -437,6 +442,23 @@ enum kInfo
 	kNumber,
 	kReward,
 	kToggle,
+};
+
+enum iInfo {
+	iID,
+	iOwnerID,
+	iOwnerType,
+	iName[64],
+	iType,
+	iSubType,
+	iAmount,
+	iValue1,
+	iValue2,
+	Float:iPos[3],
+	bool:iUsed,
+	iObject,
+	iVw,
+	iInt
 };
 
 enum vInfo {

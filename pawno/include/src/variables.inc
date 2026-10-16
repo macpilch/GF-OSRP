@@ -27,7 +27,24 @@ new bool:VehAnim[MAX_PLAYERS];
 new bool:pTrashZone[MAX_PLAYERS];
 new bool:pBushZone[MAX_PLAYERS];
 
-new pChosenItemID[MAX_PLAYERS];
+// Item:
+new const ItemCategoryNames[MAX_ITEM_TYPES][] = {
+	"", "Broñ i amunicja", "Produkty spo¿ywcze", "U¿ywki", "Elektronika",
+	"Akcesoria", "Narzêdzia", "£owiectwo", "Sadzonki", "Inne"
+};
+
+new const ItemCategoryColors[MAX_ITEM_TYPES][] = {
+	"{FFFFFF}", "{CC0000}", "{FF9900}", "{CC6600}", "{999999}",
+	"{FF66FF}", "{FFD700}", "{00CCCC}", "{00AA88}", "{33CC33}"
+};
+
+new ItemListStr[4096];
+
+new pItemListRow[MAX_PLAYERS][MAX_ITEM_LIST_ROWS];
+new pItemListRows[MAX_PLAYERS];
+new pItemListOwner[MAX_PLAYERS];
+new pItemSelected[MAX_PLAYERS];
+//
 
 new AdminVehModelID;
 new AdminVehColor[2];
@@ -283,11 +300,11 @@ stock FishNames[22][20] = {
 {"Pike"},
 {"Sail Fish"},
 {"Garbage"},
-{"TuÅ„czyk"},
+{"Tuñczyk"},
 {"Eel"},
 {"Delfin"},
 {"Rekin"},
-{"ZÃ³Å‚w"},
+{"Zó³w"},
 {"Catfish"},
 {"Money Bag"},
 {"Swordfish"}
@@ -347,6 +364,7 @@ new Unspec[MAX_PLAYERS][pSpec];
 new News[hNews];
 new PlayerInfo[MAX_PLAYERS][pInfo];
 new VehicleInfo[MAX_VEHICLES][vInfo];
+new ItemInfo[MAX_ITEMS][iInfo];
 new HouseInfo[34][hInfo];
 new BizzInfo[5][bInfo];
 new SBizzInfo[12][sbInfo];
@@ -473,7 +491,7 @@ new const DealershipFuelNames[DEALERSHIP_FUEL_TYPES][] = { "Benzyna", "Olej nape
 new DealershipInfo[MAX_DEALERSHIPS][eDealership];
 new DealershipOffer[MAX_DEALERSHIP_OFFERS][eDealershipOffer];
 new ActualDealershipOffers;
-
+//
 new pDealership[MAX_PLAYERS] = { DEALERSHIP_NONE, ... };
 new pDealershipStep[MAX_PLAYERS];
 new pDealershipOffer[MAX_PLAYERS];
@@ -481,13 +499,12 @@ new pDealershipColor[MAX_PLAYERS];
 new pDealershipFuel[MAX_PLAYERS];
 new pDealershipLastUDKey[MAX_PLAYERS];
 new pDealershipLastLRKey[MAX_PLAYERS];
-
+//
 new PlayerText:DealershipTDs[MAX_PLAYERS][16];
 new PlayerText:DealershipTDColorFrame[MAX_PLAYERS][DEALERSHIP_COLORS];
 new PlayerText:DealershipTDColor[MAX_PLAYERS][DEALERSHIP_COLORS];
 new PlayerText:DealershipTDFuel[MAX_PLAYERS][DEALERSHIP_FUEL_TYPES];
 //
-
 stock femaleSkinsId[] = {
 	9, 10, 11, 12, 13, 31, 38, 39, 40, 41, 53,
 	54, 55, 56, 63, 64, 65, 69, 75, 76, 77, 85, 87, 88, 89, 90, 91, 92, 93, 
@@ -511,7 +528,7 @@ stock maleSkinsId[] = {
 	301, 302, 303, 304, 305, 310, 311
 };
 
-stock cheapVehicles[][] = {
+new cheapVehicles[][] = {
 // Model Cena
 	{436, 5500}, {529, 5500}, {419, 5500}, {404, 5500},
 	{496, 5500}, {549, 5500}, {542, 5500}, {526, 5500}
@@ -741,6 +758,7 @@ new VehicleNames[][] = {
 };
 
 new Iterator:VehItter<MAX_VEHICLES>;
+new Iterator:ItemItter<MAX_ITEMS>;
 
 new Bar:HungerBar[MAX_PLAYERS];
 

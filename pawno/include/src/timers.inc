@@ -870,22 +870,22 @@ task GlobalTimer[1000]() {
 
 			if(Spawned[i]) {
 				new Float:HP, Float:AP;
-				new hpStr[16];
+				new HPStr[16];
 
 				GetPlayerHealth(i, HP);
 				GetPlayerArmour(i, AP);
 
 				if(AP > 0.0) {
-					format(hpStr, sizeof(hpStr), "~w~%d/200", FloatToInt(AP));
-					TextDrawSetString(HealthInfo[i][0], hpStr);
+					format(HPStr, sizeof(HPStr), "~w~%d/200", FloatToInt(AP));
+					TextDrawSetString(HealthInfo[i][0], HPStr);
 
 					TextDrawShowForPlayer(i, HealthInfo[i][0]);
 				} else {
 					TextDrawHideForPlayer(i, HealthInfo[i][0]);
 				}
 
-				format(hpStr, sizeof(hpStr), "~r~%d/100", FloatToInt(HP));
-				TextDrawSetString(HealthInfo[i][1], hpStr);
+				format(HPStr, sizeof(HPStr), "~r~%d/100", FloatToInt(HP));
+				TextDrawSetString(HealthInfo[i][1], HPStr);
 
 				TextDrawShowForPlayer(i, HealthInfo[i][1]);
 			}
