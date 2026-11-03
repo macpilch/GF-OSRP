@@ -416,10 +416,10 @@ stock ShowPlayerItemToSomeOne(playerid, someoneid, dialogid) {
 stock ResetPlayerItemList(playerid) {
 	pItemListRows[playerid] = 0;
 	pItemListOwner[playerid] = INVALID_PLAYER_ID;
-	pItemSelected[playerid] = -1;
-	pItemAction[playerid] = ITEM_ACTION_NONE;
-	pItemTarget[playerid] = -1;
-	pItemPutOption[playerid] = 0;
+	pItemSelected[playerid] = INVALID_ID;
+	//pItemAction[playerid] = ITEM_ACTION_NONE;
+	//pItemTarget[playerid] = INVALID_ID;
+	//pItemPutOption[playerid] = 0;
 	return 1;
 }
 

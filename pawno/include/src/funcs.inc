@@ -297,6 +297,7 @@ stock SavePlayerData(playerid) {
 	PlayerInfo[playerid][pCash] = GetPlayerMoney(playerid);
 	GetPlayerHealth(playerid,PlayerInfo[playerid][pHealth]);
 	GetPlayerPos(playerid, PlayerInfo[playerid][pPos_x], PlayerInfo[playerid][pPos_y], PlayerInfo[playerid][pPos_z]);
+	Org_FixSavedPos(playerid);
 
 	if(PlayerInfo[playerid][pPos_x]==0.0 && PlayerInfo[playerid][pPos_y]==0.0 && PlayerInfo[playerid][pPos_z]==0.0) {
 		PlayerInfo[playerid][pPos_x] = 1684.9;
@@ -1108,16 +1109,16 @@ stock Lotto(number) {
 			if(PlayerInfo[i][pLottoNr] == number) {
 			    JackpotFallen = 1;
 
-				format(string, sizeof(string), "Loteria: {F5DEB3}Dziœ zwyciêzc¹ zosta³ %s. Wygra³ $%d zgarniaj¹c ca³¹ stawkê. Gratulacje!", PlayerInfo[i][pName], Jackpot);
+				format(string, sizeof(string), "Loteria: {F5DEB3}Dzi  zwyci zc  zosta  %s. Wygra  $%d zgarniaj c ca   stawk . Gratulacje!", PlayerInfo[i][pName], Jackpot);
 				OOCOff(COLOR_WHITE, string);
 
-				format(string, sizeof(string), "* Wygra³eœ $%d dziêki swojemu losowi na loteriê.", Jackpot);
+				format(string, sizeof(string), "* Wygra e  $%d dzi ki swojemu losowi na loteri .", Jackpot);
 				SendClientMessage(i, COLOR_YELLOW, string);
 
 				ConsumingMoney[i] = 1;
 				GivePlayerMoney(i, Jackpot);
 			} else {
-			    SendClientMessage(i, COLOR_LIGHTBLUE, "* Tym razem nie uda³o ci siê wygraæ na loterii.");
+			    SendClientMessage(i, COLOR_LIGHTBLUE, "* Tym razem nie uda o ci si  wygra  na loterii.");
 			}
 		}
 
@@ -1174,6 +1175,10 @@ stock SetPlayerSpawn(playerid)
 		    SetPlayerInterior(playerid, 0);
 			SetPlayerPos(playerid,268.5777,1857.9351,9.8133);
 			SetPlayerWorldBounds(playerid, 337.5694,101.5826,1940.9759,1798.7453); //285.3481,96.9720,1940.9755,1799.0811
+			return 1;
+		}
+		if(Org_OnSpawn(playerid))
+		{
 			return 1;
 		}
 		if(house !=255)
@@ -1941,7 +1946,6 @@ stock ShowStats(playerid, targetid) {
 	format(coordsstring, sizeof(coordsstring), "Pieni¹dze: [$%d] Przestêpstwa: [%d] Aresztowany: [%d] Poziom poszukiwania: [%d] Sylwetka: [%s] Kondycja: [%s]", cash, crimes, arrests, wanted, stext, cotext);
 	SendClientMessage(playerid, COLOR_GRAD4,coordsstring);
 	format(coordsstring, sizeof(coordsstring), "Z³apanych ryb: [%d] U¿ywana przynêta: [%s] Œlub z: [%s] Numer Lotto: [%s] Styl walki: [%s]", fishes, "Brak", married, (lotto > 0) ? lottostr : ("Brak"), fstext);
-	SendClientMessage(playerid, COLOR_GRAD5,coordsstring);
 	format(coordsstring, sizeof(coordsstring), "Choroba: [%s] Organizacja: [%s] Ranga: [%s] Praca: [%s]", dtext, ttext, rtext, jtext);
 	SendClientMessage(playerid, COLOR_GRAD5,coordsstring);
 
@@ -2749,9 +2753,9 @@ stock PayDay() {
 				PlayerInfo[i][pAccount] = account+interest;
 
 				SendClientMessage(i, COLOR_WHITE, "|__________ {E6BA43}Bilans Banku {FFFFFF}___________|");
-				format(string, sizeof(string), "  {6495ED}Wyp³ata:{DCDCDC} $%d (-$%d)  {6495ED}Podatek:{DCDCDC} %d%", checks, TaxValue, tmpintrate);
+				format(string, sizeof(string), "  {6495ED}Wyp ata:{DCDCDC} $%d (-$%d)  {6495ED}Podatek:{DCDCDC} %d%", checks, TaxValue, tmpintrate);
 				SendClientMessage(i, COLOR_GRAD1, string);
-				format(string, sizeof(string), "  {6495ED}Wyp³ata po odjêciu podatku:{DCDCDC} $%d", account);
+				format(string, sizeof(string), "  {6495ED}Wyp ata po odj ciu podatku:{DCDCDC} $%d", account);
 				SendClientMessage(i, COLOR_GRAD1, string);
 				format(string, sizeof(string), "  {6495ED}Oprocentowanie:{DCDCDC} 0.%d%",tmpintrate);
 				SendClientMessage(i, COLOR_GRAD2, string);
@@ -2759,7 +2763,7 @@ stock PayDay() {
 				SendClientMessage(i, COLOR_GRAD3, string);
 
 				if(PlayerInfo[i][pPhousekey] != 255 || PlayerInfo[i][pPbiskey] != 255) {
-					format(string, sizeof(string), "  {6495ED}Rachunek za pr¹d:{DCDCDC} -$%d", ebill);
+					format(string, sizeof(string), "  {6495ED}Rachunek za pr d:{DCDCDC} -$%d", ebill);
 					SendClientMessage(i, COLOR_GRAD1, string);
 				} else {
 					format(string, sizeof(string), "  {6495ED}Czynsz:{DCDCDC} -$%d", rent);
@@ -2786,7 +2790,7 @@ stock PayDay() {
 					}
 				}
 			} else {
-				SendClientMessage(i, COLOR_LIGHTRED, "* Nie gra³eœ wystarczaj¹co d³ugo, aby dostaæ wyp³atê.");
+				SendClientMessage(i, COLOR_LIGHTRED, "* Nie gra e  wystarczaj co d ugo, aby dosta  wyp at .");
 			}
 		}
 	}
@@ -2980,7 +2984,7 @@ stock OnPlayerRegister(playerid) {
 	mysql_query(queryStr);
 
 	createdChar[playerid] = true;
-	SendClientMessage(playerid, COLOR_YELLOW, "Postaæ zosta³a pomyœlnie stworzona. Teraz mo¿esz siê na ni¹ zalogowaæ.");	
+	SendClientMessage(playerid, COLOR_YELLOW, "Posta  zosta a pomy lnie stworzona. Teraz mo esz si  na ni  zalogowa .");	
 	return 1;
 }
 
@@ -3174,9 +3178,9 @@ stock OnPlayerLogin(playerid, name[]) {
 		mainStr[0] = EOS;
 
 		if(PlayerInfo[playerid][pAdmin] == 1) {
-			format(mainStr, sizeof(mainStr), "Serwer: Zalogowa³eœ siê jako moderator z poziomem %d.", PlayerInfo[playerid][pAdmin]);
+			format(mainStr, sizeof(mainStr), "Serwer: Zalogowa e  si  jako moderator z poziomem %d.", PlayerInfo[playerid][pAdmin]);
 		} else {
-			format(mainStr, sizeof(mainStr), "Serwer: Zalogowa³eœ siê jako admin z poziomem %d.", PlayerInfo[playerid][pAdmin]);
+			format(mainStr, sizeof(mainStr), "Serwer: Zalogowa e  si  jako admin z poziomem %d.", PlayerInfo[playerid][pAdmin]);
 		}
 
 		SendClientMessage(playerid, COLOR_WHITE, mainStr);
@@ -3196,7 +3200,7 @@ stock OnPlayerLogin(playerid, name[]) {
 	SetPlayerName(playerid, PlayerInfo[playerid][pName]);
 
 	mainStr[0] = EOS;
-	format(mainStr, sizeof(mainStr), "Logowanie: %s (id: %d) zalogowa³ siê na postaæ %s.", accName[playerid], playerid, PlayerInfo[playerid][pName]);
+	format(mainStr, sizeof(mainStr), "Logowanie: %s (id: %d) zalogowa  si  na posta  %s.", accName[playerid], playerid, PlayerInfo[playerid][pName]);
 	ABroadCast(COLOR_LIGHTRED, mainStr, 1);
 
 	for(new i = 0; i < 4; i++) {
@@ -3219,6 +3223,7 @@ stock OnPlayerLogin(playerid, name[]) {
 	}
 
 	gPlayerLogged[playerid] = 1;
+	Org_OnLogin(playerid);
 	createdChar[playerid] = false;
 	SpawnPlayer(playerid);
 	DateProp(playerid);
@@ -3546,7 +3551,14 @@ stock StopMusic()
 	{
 		if(IsPlayerConnected(i))
 		{
-			PlayerPlaySound(i, 1069, 0.0, 0.0, 0.0);
+			if(GetPlayerInterior(i) == 0)
+			{
+				PlayerPlaySound(i, 0, 0.0, 0.0, 0.0);	
+			} 
+			else 
+			{
+				PlayerPlaySound(i, 1, 0.0, 0.0, 0.0); //default 1069
+			}
 		}
 	}
 }
@@ -3778,7 +3790,7 @@ stock GetPlayerSex(playerid) {
 
 	switch(PlayerInfo[playerid][pSex]) {
 		case 0: {
-			sex = "Mê¿czyzna";
+			sex = "M czyzna";
 		}
 		case 1: {
 			sex = "Kobieta";
@@ -3815,13 +3827,13 @@ stock GetPlayerOrigin(playerid) {
 
 	switch(PlayerInfo[playerid][pOrigin]) {
 		case 0: {
-			origin = "Bia³a";
+			origin = "Bia a";
 		}
 		case 1: {
 			origin = "Czarna";
 		}
 		case 2: {
-			origin = "¯ó³ta";
+			origin = "  ta";
 		}
 	}
 	return origin;

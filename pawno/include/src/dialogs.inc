@@ -535,10 +535,12 @@ sampCallback OnDialogResponse(playerid, dialogid, response, listitem, inputtext[
 					
 				}
 				case 3: {
-					DestroyItem(ItemId);
+					mainStr[0] = EOS;
+					format(mainStr, sizeof(mainStr), "* %s niszczy przedmiot ( %s ).", PlayerInfo[playerid][pName], ItemInfo[ItemId][iName]);
+					ProxDetector(30.0, playerid, mainStr, COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE,COLOR_PURPLE);
 
-					pItemSelected[playerid] = INVALID_ID;
-					ShowPlayerItemToSomeOne(playerid, playerid, DIALOG_ITEM_LIST);
+					DestroyItem(ItemId);
+					ResetPlayerItemList(playerid);
 				}
 			}
 		}
